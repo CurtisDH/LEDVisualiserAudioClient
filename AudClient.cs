@@ -6,18 +6,23 @@ namespace AudioClient;
 public class AudClient
 {
     private readonly double _threshold;
-    private const int sampleRate = 44100;
+    private const int sampleRate = 32000;
+    private Int16[] dataPcm;
+    double[] dataFft;
+    private WaveFormat captureWF;
 
     public AudClient(double threshold)
     {
         _threshold = threshold;
     }
-
+    
     public void Init()
     {
-        using (WasapiLoopbackCapture capture = new())
+        using (var capture = new WasapiLoopbackCapture())
+
         {
             capture.WaveFormat = new WaveFormat(sampleRate, 16, 1);
+            captureWF = capture.WaveFormat;
             // Set up an event handler to receive the audio data
             capture.DataAvailable += OnDataAvailable;
 
@@ -33,43 +38,54 @@ public class AudClient
         }
     }
 
+
     void OnDataAvailable(object sender, WaveInEventArgs e)
     {
-        // Create an array to hold the complex numbers representing the audio data
-        Complex[] audioData = new Complex[e.BytesRecorded / 2];
+        int bytesPerSample = captureWF.BitsPerSample / 8;
+        int samplesRecorded = e.BytesRecorded / bytesPerSample;
 
-        // Fill the array with the audio data
-        for (int i = 0; i < e.BytesRecorded / 2; i++)
+        // reallocating seems stupid here, but the values vary in size.
+        // perhaps it is better to use a value that will fit the size regardless?
+        dataPcm = new Int16[samplesRecorded];
+        for (int i = 0; i < samplesRecorded; i++)
         {
-            audioData[i].X = (float)((short)(e.Buffer[i * 2] | e.Buffer[i * 2 + 1] << 8)) / 32768;
-            audioData[i].Y = 0;
+            dataPcm[i] = BitConverter.ToInt16(e.Buffer, i * bytesPerSample);
         }
 
-        // Perform the FFT on the audio data
-        FastFourierTransform.FFT(true, (int)Math.Log(audioData.Length, 2.0), audioData);
+        // the PCM size to be analyzed with FFT must be a power of 2
+        int fftPoints = 2;
+        while (fftPoints * 2 <= dataPcm.Length)
+            fftPoints *= 2;
 
-        // Add the data from the power spectrum to the line series
-        for (int i = 2300; i < audioData.Length; i++)
+        // apply a Hamming window function as we load the FFT array then calculate the FFT
+        NAudio.Dsp.Complex[] fftFull = new NAudio.Dsp.Complex[fftPoints];
+        for (int i = 0; i < fftPoints; i++)
         {
-            
-            // TODO play with colour spectrum's and shifting at random intervals
-            
-            // TODO only take the peak of the sine wave instead of the 'build ups'
-            
-            
-            var y = Math.Sqrt(audioData[i].X * audioData[i].X + audioData[i].Y * audioData[i].Y);
+            fftFull[i].X = (float)(dataPcm[i] * NAudio.Dsp.FastFourierTransform.HammingWindow(i, fftPoints));
+        }
+
+        NAudio.Dsp.FastFourierTransform.FFT(true, (int)Math.Log(fftPoints, 2.0), fftFull);
+
+        // copy the complex values into the double array that will be plotted
+
+        // same as above... should we really be creating a new double?
+        dataFft = new double[fftPoints / 2];
+        for (int i = 0; i < fftPoints / 2; i++)
+        {
+            double fftLeft = Math.Abs(fftFull[i].X + fftFull[i].Y);
+            double fftRight = Math.Abs(fftFull[fftPoints - i - 1].X + fftFull[fftPoints - i - 1].Y);
+            dataFft[i] = fftLeft + fftRight;
+            var y = dataFft[i];
+            var freq = i * sampleRate / fftPoints;
             if (y > _threshold)
             {
-                Console.WriteLine($"{y}, {i}");
+                Console.WriteLine($"{y}, {freq}");
                 byte colourR = 0;
                 byte colourG = 0;
                 byte colourB = 0;
                 byte delay = 0;
                 var calc = (byte)(y * 1000);
-                
-                
-                
-                
+
 
                 var ledColour = (byte)(calc * 2);
                 if (y < _threshold * 3)
@@ -99,7 +115,6 @@ public class AudClient
                 //Console.WriteLine(y);
                 var networkClient = new NetClient("192.168.1.11", 5555);
                 networkClient.SendData(meaningfulData);
-                // now we want to determine what to send
             }
         }
     }
