@@ -8,14 +8,54 @@
         {
             if (args.Length < 1)
             {
-                string ip = "127.0.0.1";
-                Console.WriteLine($"###WARNING###");
-                Console.WriteLine($"No arguments provided Starting audio client with target IP address set to:\n{ip}");
-                Console.WriteLine($"###WARNING###");
+                Console.WriteLine("No launch arguments were found. Run the default config? (y/n)");
+                var response = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(response) || response.ToLower()[0] == 'y')
+                {
+                    string ip = "127.0.0.1";
+                    Console.WriteLine($"###WARNING###");
+                    Console.WriteLine(
+                        $"No arguments provided Starting audio client with target IP address set to:\n{ip}" +
+                        $"\n" +
+                        $"Threshold set to: {defaultThreshold}");
+                    Console.WriteLine($"###WARNING###");
 
-                var audioAudClient = new AudClient(defaultThreshold, ip);
-                audioAudClient.Init();
-                return;
+                    var audioAudClient = new AudClient(defaultThreshold, ip);
+                    audioAudClient.Init();
+                    return;
+                }
+
+                Console.WriteLine("'n' Selected. Please enter the desired program type (Server/Client)");
+                var res = Console.ReadLine().ToLower();
+                switch (res)
+                {
+                    case "server":
+                        Console.WriteLine("Server was selected. Provide the port");
+                        Console.Write(">");
+                        int.TryParse(Console.ReadLine(), out int port);
+                        Console.WriteLine($"Port set to {port}");
+                        Console.WriteLine("dataSize (EXPECTED BYTE ARRAY SIZE):");
+                        Console.Write(">");
+                        var dataSize = int.Parse(Console.ReadLine());
+                        Console.WriteLine($"DataSize set to {dataSize} bytes");
+                        Console.WriteLine("Attempting to Start server...");
+                        var networkServer = new NetworkServer(port, dataSize);
+                        networkServer.Listen();
+                        break;
+                    case "client":
+                        Console.WriteLine("Client selected. Enter the target magnitude");
+                        float.TryParse(Console.ReadLine(), out float threshold);
+                        Console.WriteLine("Provide the target IP address");
+                        var targetIP = Console.ReadLine();
+                        Console.WriteLine("Attempting to start client...");
+                        var audioAudClient = new AudClient(threshold, targetIP);
+                        audioAudClient.Init();
+
+                        break;
+                    default:
+                        Console.WriteLine("invalid response, exiting.");
+                        return;
+                }
             }
 
             if (args[0].ToLower() == "server")
