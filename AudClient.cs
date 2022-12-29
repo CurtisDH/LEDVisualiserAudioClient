@@ -6,16 +6,18 @@ namespace AudioClient;
 public class AudClient
 {
     private readonly double _threshold;
-    private const int sampleRate = 32000;
+    private const int sampleRate = 44100;
     private Int16[] dataPcm;
     double[] dataFft;
     private WaveFormat captureWF;
+    private string ip;
 
-    public AudClient(double threshold)
+    public AudClient(double threshold, string ip)
     {
         _threshold = threshold;
+        this.ip = ip;
     }
-    
+
     public void Init()
     {
         using (var capture = new WasapiLoopbackCapture())
@@ -75,45 +77,145 @@ public class AudClient
             double fftLeft = Math.Abs(fftFull[i].X + fftFull[i].Y);
             double fftRight = Math.Abs(fftFull[fftPoints - i - 1].X + fftFull[fftPoints - i - 1].Y);
             dataFft[i] = fftLeft + fftRight;
+
             var y = dataFft[i];
             var freq = i * sampleRate / fftPoints;
-            if (y > _threshold)
+
+
+            // if (freq < 45 && freq >= 25) // bass  -- threshold tbd
+
+            // if (freq > 23 && freq < 120)
+            if (y > _threshold && y < _threshold * 1.25)
             {
                 Console.WriteLine($"{y}, {freq}");
                 byte colourR = 0;
                 byte colourG = 0;
                 byte colourB = 0;
                 byte delay = 0;
-                var calc = (byte)(y * 1000);
-
-
-                var ledColour = (byte)(calc * 2);
-                if (y < _threshold * 3)
+                // dividing for reduced brightness
+                var calc = (byte)(y / 64);
+                switch (freq)
                 {
-                    colourB = ledColour;
-                    delay = 50;
-                }
-                else
-                {
-                    colourB = ledColour;
-                    colourR = ledColour;
-                    delay = 25;
+                    case 0:
+                        colourR = calc;
+                        colourG = 0;
+                        colourB = 0;
+                        break;
+                    case 21:
+                        colourR = calc;
+                        colourG = 0;
+                        colourB = (byte)(calc / 2);
+                        break;
+                    case 43:
+                        colourR = (byte)(calc / 1.25);
+                        colourG = 0;
+                        colourB = calc;
+
+                        break;
+                    case 64:
+                        colourR = (byte)(calc / 4);
+                        colourG = 0;
+                        colourB = calc;
+
+                        break;
+                    case 86:
+                        colourR = 0;
+                        colourG = calc;
+                        colourB = (byte)(calc / 2);
+
+                        break;
+                    case 107:
+                        colourR = 0;
+                        colourG = calc;
+                        colourB = (byte)(calc / 1.25);
+
+                        break;
+                    case 129:
+                        colourR = 0;
+                        colourG = calc;
+                        colourB = 0;
+
+                        break;
+                    case 150:
+                        colourR = (byte)(calc / 2);
+                        colourG = calc;
+                        colourB = 0;
+
+                        break;
+                    case 172:
+                        colourR = (byte)(calc / 3);
+                        colourG = calc;
+                        colourB = 0;
+
+                        break;
+                    case 193:
+                        colourR = calc;
+                        colourG = (byte)(calc / 2);
+                        colourB = 0;
+
+                        break;
+                    case 215:
+                        colourR = calc;
+                        colourG = (byte)(calc / 3);
+                        colourB = 0;
+
+                        break;
+                    case 237:
+                        colourR = calc;
+                        colourG = (byte)(calc / 4);
+                        colourB = 0;
+
+                        break;
+                    case 258:
+                        colourR = (byte)(calc / 4);
+                        colourG = calc;
+                        colourB = (byte)(calc / 1.2);
+
+                        break;
+                    case 280:
+                        colourR = calc;
+                        colourG = calc;
+                        colourB = calc;
+
+                        break;
+                    case 301:
+                        colourR = calc;
+                        colourG = calc;
+                        colourB = calc;
+
+                        break;
+                    case 323:
+                        colourR = calc;
+                        colourG = calc;
+                        colourB = calc;
+
+                        break;
+                    case 344:
+                        colourR = calc;
+                        colourG = calc;
+                        colourB = calc;
+
+                        break;
+                    case 366:
+                        colourR = calc;
+                        colourG = calc;
+                        colourB = calc;
+
+                        break;
+                    default:
+                        colourR = calc;
+                        colourG = calc;
+                        colourB = calc;
+                        break;
                 }
 
-                if (y < _threshold / 2)
-                {
-                    colourR = 0;
-                    colourG = 0;
-                    colourB = 0;
-                    delay = 0;
-                }
 
                 byte brightness = calc;
                 byte numLeds = (byte)(calc / 2);
 
                 byte[] meaningfulData = new[] { numLeds, colourR, colourG, colourB, brightness, delay };
                 //Console.WriteLine(y);
-                var networkClient = new NetClient("192.168.1.11", 5555);
+                var networkClient = new NetClient(ip, 5555);
                 networkClient.SendData(meaningfulData);
             }
         }
