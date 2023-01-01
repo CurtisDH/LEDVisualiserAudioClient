@@ -1,14 +1,5 @@
-/*
-C# Network Programming 
-by Richard Blum
-
-Publisher: Sybex 
-ISBN: 0782141765
-*/
-
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 
 namespace AudioClient;
 
@@ -17,6 +8,7 @@ public class NetworkServer
     private IPEndPoint _sender;
     private readonly UdpClient _receiveSocket;
     byte[] data = new byte[6];
+    private int ledCount;
 
     public NetworkServer(int port, int dataSizeInBytes)
     {
@@ -24,6 +16,9 @@ public class NetworkServer
         var ipEndPoint = new IPEndPoint(IPAddress.Any, port);
         _receiveSocket = new UdpClient(ipEndPoint);
         _sender = new IPEndPoint(IPAddress.Any, 0);
+        Console.WriteLine("Number of LEDS");
+        Console.WriteLine(">");
+        ledCount = Int32.Parse(Console.ReadLine());
     }
 
     public void Listen()

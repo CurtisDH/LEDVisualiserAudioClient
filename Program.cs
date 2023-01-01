@@ -2,7 +2,7 @@
 {
     internal static class Program
     {
-        private static double defaultThreshold = 125; // this is kinda like volume
+        private static double defaultThreshold = 75; // this is kinda like volume
 
         private static void Main(string[] args)
         {
@@ -12,7 +12,7 @@
                 var response = Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(response) || response.ToLower()[0] == 'y')
                 {
-                    string ip = "127.0.0.1";
+                    string ip = "192.168.1.11";
                     Console.WriteLine($"###WARNING###");
                     Console.WriteLine(
                         $"No arguments provided Starting audio client with target IP address set to:\n{ip}" +

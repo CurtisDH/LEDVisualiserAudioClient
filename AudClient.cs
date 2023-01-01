@@ -71,153 +71,163 @@ public class AudClient
         // copy the complex values into the double array that will be plotted
 
         // same as above... should we really be creating a new double?
+
+        /*
+         * only take the value for highest magnitude 
+
+        this could be split into freq ranges but this will reduce a lot of the "noise" and make it more beat focused?
+         */
+
+
         dataFft = new double[fftPoints / 2];
+
         for (int i = 0; i < fftPoints / 2; i++)
         {
             double fftLeft = Math.Abs(fftFull[i].X + fftFull[i].Y);
             double fftRight = Math.Abs(fftFull[fftPoints - i - 1].X + fftFull[fftPoints - i - 1].Y);
             dataFft[i] = fftLeft + fftRight;
+        }
 
-            var y = dataFft[i];
-            var freq = i * sampleRate / fftPoints;
+        var y = dataFft.Max();
+        //var freq = i * sampleRate / fftPoints;
 
 
-            // if (freq < 45 && freq >= 25) // bass  -- threshold tbd
+        // if (freq < 45 && freq >= 25) // bass  -- threshold tbd
 
-            // if (freq > 23 && freq < 120)
-            if (y > _threshold && y < _threshold * 1.25)
+        // if (freq > 23 && freq < 120)
+        if (y > _threshold)
+        {
+            Console.WriteLine($"{y}, {y / 4}");
+            byte colourR = 0;
+            byte colourG = 0;
+            byte colourB = 0;
+            byte delay = 0;
+            // dividing for reduced brightness
+            var calc = (byte)(y / 32);
+            switch (y / 4)
             {
-                Console.WriteLine($"{y}, {freq}");
-                byte colourR = 0;
-                byte colourG = 0;
-                byte colourB = 0;
-                byte delay = 0;
-                // dividing for reduced brightness
-                var calc = (byte)(y / 64);
-                switch (freq)
-                {
-                    case 0:
-                        colourR = calc;
-                        colourG = 0;
-                        colourB = 0;
-                        break;
-                    case 21:
-                        colourR = calc;
-                        colourG = 0;
-                        colourB = (byte)(calc / 2);
-                        break;
-                    case 43:
-                        colourR = (byte)(calc / 1.25);
-                        colourG = 0;
-                        colourB = calc;
+                case > 0 and < 21:
+                    colourR = calc;
+                    colourG = 0;
+                    colourB = 0;
+                    break;
+                case > 21 and < 43:
+                    colourR = calc;
+                    colourG = 0;
+                    colourB = (byte)(calc / 2);
+                    break;
+                case > 43 and < 64:
+                    colourR = (byte)(calc / 1.25);
+                    colourG = 0;
+                    colourB = calc;
 
-                        break;
-                    case 64:
-                        colourR = (byte)(calc / 4);
-                        colourG = 0;
-                        colourB = calc;
+                    break;
+                case > 64 and < 86:
+                    colourR = (byte)(calc / 4);
+                    colourG = 0;
+                    colourB = calc;
 
-                        break;
-                    case 86:
-                        colourR = 0;
-                        colourG = calc;
-                        colourB = (byte)(calc / 2);
+                    break;
+                case 86:
+                    colourR = 0;
+                    colourG = calc;
+                    colourB = (byte)(calc / 2);
 
-                        break;
-                    case 107:
-                        colourR = 0;
-                        colourG = calc;
-                        colourB = (byte)(calc / 1.25);
+                    break;
+                case 107:
+                    colourR = 0;
+                    colourG = calc;
+                    colourB = (byte)(calc / 1.25);
 
-                        break;
-                    case 129:
-                        colourR = 0;
-                        colourG = calc;
-                        colourB = 0;
+                    break;
+                case 129:
+                    colourR = 0;
+                    colourG = calc;
+                    colourB = 0;
 
-                        break;
-                    case 150:
-                        colourR = (byte)(calc / 2);
-                        colourG = calc;
-                        colourB = 0;
+                    break;
+                case 150:
+                    colourR = (byte)(calc / 2);
+                    colourG = calc;
+                    colourB = 0;
 
-                        break;
-                    case 172:
-                        colourR = (byte)(calc / 3);
-                        colourG = calc;
-                        colourB = 0;
+                    break;
+                case 172:
+                    colourR = (byte)(calc / 3);
+                    colourG = calc;
+                    colourB = 0;
 
-                        break;
-                    case 193:
-                        colourR = calc;
-                        colourG = (byte)(calc / 2);
-                        colourB = 0;
+                    break;
+                case 193:
+                    colourR = calc;
+                    colourG = (byte)(calc / 2);
+                    colourB = 0;
 
-                        break;
-                    case 215:
-                        colourR = calc;
-                        colourG = (byte)(calc / 3);
-                        colourB = 0;
+                    break;
+                case 215:
+                    colourR = calc;
+                    colourG = (byte)(calc / 3);
+                    colourB = 0;
 
-                        break;
-                    case 237:
-                        colourR = calc;
-                        colourG = (byte)(calc / 4);
-                        colourB = 0;
+                    break;
+                case 237:
+                    colourR = calc;
+                    colourG = (byte)(calc / 4);
+                    colourB = 0;
 
-                        break;
-                    case 258:
-                        colourR = (byte)(calc / 4);
-                        colourG = calc;
-                        colourB = (byte)(calc / 1.2);
+                    break;
+                case 258:
+                    colourR = (byte)(calc / 4);
+                    colourG = calc;
+                    colourB = (byte)(calc / 1.2);
 
-                        break;
-                    case 280:
-                        colourR = calc;
-                        colourG = calc;
-                        colourB = calc;
+                    break;
+                case 280:
+                    colourR = 0;
+                    colourG = 0;
+                    colourB = calc;
 
-                        break;
-                    case 301:
-                        colourR = calc;
-                        colourG = calc;
-                        colourB = calc;
+                    break;
+                case 301:
+                    colourR = 0;
+                    colourG = calc;
+                    colourB = 0;
 
-                        break;
-                    case 323:
-                        colourR = calc;
-                        colourG = calc;
-                        colourB = calc;
+                    break;
+                case 323:
+                    colourR = 0;
+                    colourG = calc;
+                    colourB = (byte)(calc / 4);
 
-                        break;
-                    case 344:
-                        colourR = calc;
-                        colourG = calc;
-                        colourB = calc;
+                    break;
+                case 344:
+                    colourR = 0;
+                    colourG = calc;
+                    colourB = (byte)(calc / 1.25);
 
-                        break;
-                    case 366:
-                        colourR = calc;
-                        colourG = calc;
-                        colourB = calc;
+                    break;
+                case 366:
+                    colourR = 0;
+                    colourG = (byte)(calc / 2);
+                    colourB = calc;
 
-                        break;
-                    default:
-                        colourR = calc;
-                        colourG = calc;
-                        colourB = calc;
-                        break;
-                }
-
-
-                byte brightness = calc;
-                byte numLeds = (byte)(calc / 2);
-
-                byte[] meaningfulData = new[] { numLeds, colourR, colourG, colourB, brightness, delay };
-                //Console.WriteLine(y);
-                var networkClient = new NetClient(ip, 5555);
-                networkClient.SendData(meaningfulData);
+                    break;
+                default:
+                    colourR = calc;
+                    colourG = calc;
+                    colourB = calc;
+                    break;
             }
+
+
+            byte brightness = calc;
+            byte numLeds = (byte)(calc / 2);
+
+            byte[] meaningfulData = new[] { numLeds, colourR, colourG, colourB, brightness, delay };
+            //Console.WriteLine(y);
+            var networkClient = new NetClient(ip, 5555);
+            networkClient.SendData(meaningfulData);
+            return;
         }
     }
 }
