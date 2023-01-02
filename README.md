@@ -35,6 +35,12 @@ arg[3]: port (e.g. 5555)
 AudioClient.exe client 75 192.168.11 5555  
 Starts the program as a client, magnitude threshold at 75, ip set to 192.168.11, and the target port being 5555
 <br />
+<br />
+<br />
+### Debugging Optional parameter
+adding debug to the end of either, server, or client e.g  
+AudioClient.exe client 75 192.168.11 5555 debug  
+will then log the magnitude value, and adjusted magnitude value to the terminal
 
 
 
@@ -53,5 +59,7 @@ Delay is currently unused and will always be 0.
 ## Potentially useful information
 Magnitude threshold: Lower values will respond to quieter sounds, higher values will ignore quieter sounds. Keep in mind the magnitude value is captured from the highest value in the FFT set, play around with this value to see what works best for you    
 <br />    
-On the same note, colour spectrum is based on the magnitude value, so a higher volume will result in less colours, there is definitely a sweet spot for the max colour distribution.
+On the same note, colour spectrum is based on the magnitude value, so a higher volume will result in less colours, there is definitely a sweet spot for the max colour distribution.  
+<br />
+Bluetooth devices such as UE boom's when paused for x period of time go into some sort of disconnected state, when this happens you can press any key into the terminal to force the program to re-attach to the default device **once audio playback has been resumed**
 
