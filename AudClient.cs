@@ -12,11 +12,13 @@ public class AudClient
     private WaveFormat captureWF;
     private string ip;
     private bool sentRealPacket;
+    private int port; 
 
-    public AudClient(double threshold, string ip)
+    public AudClient(double threshold, string ip, int port)
     {
         _threshold = threshold;
         this.ip = ip;
+        this.port = port;
     }
 
     public void Init()
@@ -68,17 +70,7 @@ public class AudClient
         }
 
         NAudio.Dsp.FastFourierTransform.FFT(true, (int)Math.Log(fftPoints, 2.0), fftFull);
-
-        // copy the complex values into the double array that will be plotted
-
-        // same as above... should we really be creating a new double?
-
-        /*
-         * only take the value for highest magnitude 
-
-        this could be split into freq ranges but this will reduce a lot of the "noise" and make it more beat focused?
-         */
-
+        
 
         dataFft = new double[fftPoints / 2];
 
@@ -227,7 +219,7 @@ public class AudClient
 
             byte[] meaningfulData = new[] { numLeds, colourR, colourG, colourB, brightness, delay };
             //Console.WriteLine(y);
-            var networkClient = new NetClient(ip, 5555);
+            var networkClient = new NetClient(ip, port);
             networkClient.SendData(meaningfulData);
             sentRealPacket = true;
             return;
@@ -240,7 +232,7 @@ public class AudClient
             byte delay = 0;
             byte[] meaningfulData = new[] { (byte)0, colourR, colourG, colourB, (byte)0, delay };
             //Console.WriteLine(y);
-            var networkClient = new NetClient(ip, 5555);
+            var networkClient = new NetClient(ip, port);
             networkClient.SendData(meaningfulData);
             sentRealPacket = false;
         }

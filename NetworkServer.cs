@@ -16,9 +16,6 @@ public class NetworkServer
         var ipEndPoint = new IPEndPoint(IPAddress.Any, port);
         _receiveSocket = new UdpClient(ipEndPoint);
         _sender = new IPEndPoint(IPAddress.Any, 0);
-        Console.WriteLine("Number of LEDS");
-        Console.WriteLine(">");
-        ledCount = Int32.Parse(Console.ReadLine());
     }
 
     public void Listen()

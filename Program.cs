@@ -20,7 +20,7 @@
                         $"Threshold set to: {defaultThreshold}");
                     Console.WriteLine($"###WARNING###");
 
-                    var audioAudClient = new AudClient(defaultThreshold, ip);
+                    var audioAudClient = new AudClient(defaultThreshold, ip, 5555);
                     audioAudClient.Init();
                     return;
                 }
@@ -38,6 +38,7 @@
                         Console.Write(">");
                         var dataSize = int.Parse(Console.ReadLine());
                         Console.WriteLine($"DataSize set to {dataSize} bytes");
+                        Console.WriteLine("Enter number of LEDS in your strip (Expected int)");
                         Console.WriteLine("Attempting to Start server...");
                         var networkServer = new NetworkServer(port, dataSize);
                         networkServer.Listen();
@@ -47,8 +48,10 @@
                         float.TryParse(Console.ReadLine(), out float threshold);
                         Console.WriteLine("Provide the target IP address");
                         var targetIP = Console.ReadLine();
+                        Console.WriteLine("Provide the target IP address");
+                        port = int.Parse(Console.ReadLine());
                         Console.WriteLine("Attempting to start client...");
-                        var audioAudClient = new AudClient(threshold, targetIP);
+                        var audioAudClient = new AudClient(threshold, targetIP, port);
                         audioAudClient.Init();
 
                         break;
@@ -82,8 +85,11 @@
                 Console.WriteLine("TargetIP: (string value expected)");
                 var targetIP = (args[2]);
                 Console.WriteLine($"TargetIP set to: {targetIP}");
+                Console.WriteLine($"Port: (int value expected)");
+                var port = int.Parse(args[3]);
+                Console.WriteLine($"Port set to: {port})");
                 Console.WriteLine("Starting audio client...");
-                var audioAudClient = new AudClient(threshold, targetIP);
+                var audioAudClient = new AudClient(threshold, targetIP,port);
                 audioAudClient.Init();
             }
         }
