@@ -31,7 +31,6 @@ public class NetworkServer
             var b = data[3];
             var brightness = data[4];
             var delay = data[5];
-
             Console.WriteLine($"NUM LEDS:{num_leds} R {r}, G {g}, B {b}, brightness: {brightness}, Delay: {delay}");
         }
     }

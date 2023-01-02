@@ -12,7 +12,7 @@ public class AudClient
     private WaveFormat captureWF;
     private string ip;
     private bool sentRealPacket;
-    private int port; 
+    private int port;
 
     public AudClient(double threshold, string ip, int port)
     {
@@ -35,11 +35,11 @@ public class AudClient
             capture.StartRecording();
 
             // Wait for the user to stop capturing audio
-            Console.WriteLine("Press any key to stop capturing audio...");
+            Console.WriteLine("Press any key to reconnect to audio");
             Console.ReadKey();
 
-            // Stop capturing audio
-            capture.StopRecording();
+            capture.DataAvailable -= OnDataAvailable;
+            Init();
         }
     }
 
@@ -70,7 +70,7 @@ public class AudClient
         }
 
         NAudio.Dsp.FastFourierTransform.FFT(true, (int)Math.Log(fftPoints, 2.0), fftFull);
-        
+
 
         dataFft = new double[fftPoints / 2];
 
@@ -82,15 +82,10 @@ public class AudClient
         }
 
         var y = dataFft.Max();
-        //var freq = i * sampleRate / fftPoints;
-
-
-        // if (freq < 45 && freq >= 25) // bass  -- threshold tbd
-
-        // if (freq > 23 && freq < 120)
         if (y > _threshold)
         {
-            Console.WriteLine($"{y}, {y / 4}");
+            if (Program.debug)
+                Console.WriteLine($"{y}, {y / 4}");
             byte colourR = 0;
             byte colourG = 0;
             byte colourB = 0;
@@ -128,7 +123,7 @@ public class AudClient
                     colourB = (byte)(calc / 2);
 
                     break;
-                case > 107 and <129:
+                case > 107 and < 129:
                     colourR = 0;
                     colourG = calc;
                     colourB = (byte)(calc / 1.25);
@@ -170,7 +165,7 @@ public class AudClient
                     colourB = 0;
 
                     break;
-                case > 258 and < 280 :
+                case > 258 and < 280:
                     colourR = (byte)(calc / 4);
                     colourG = calc;
                     colourB = (byte)(calc / 1.2);

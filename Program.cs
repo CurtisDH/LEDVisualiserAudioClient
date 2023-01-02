@@ -2,10 +2,17 @@
 {
     internal static class Program
     {
+        public static bool debug = false;
         private static double defaultThreshold = 75; // this is kinda like volume
 
         private static void Main(string[] args)
         {
+            if (args.Contains("debug"))
+            {
+                debug = true;
+                Console.WriteLine("Debug mode enabled. Parsing additional arguments");
+            }
+
             if (args.Length < 1)
             {
                 Console.WriteLine("No launch arguments were found. Run the default config? (y/n)");
@@ -89,7 +96,7 @@
                 var port = int.Parse(args[3]);
                 Console.WriteLine($"Port set to: {port})");
                 Console.WriteLine("Starting audio client...");
-                var audioAudClient = new AudClient(threshold, targetIP,port);
+                var audioAudClient = new AudClient(threshold, targetIP, port);
                 audioAudClient.Init();
             }
         }
