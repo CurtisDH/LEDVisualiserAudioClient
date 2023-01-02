@@ -48,7 +48,7 @@
                         float.TryParse(Console.ReadLine(), out float threshold);
                         Console.WriteLine("Provide the target IP address");
                         var targetIP = Console.ReadLine();
-                        Console.WriteLine("Provide the target IP address");
+                        Console.WriteLine("Provide the target port");
                         port = int.Parse(Console.ReadLine());
                         Console.WriteLine("Attempting to start client...");
                         var audioAudClient = new AudClient(threshold, targetIP, port);
