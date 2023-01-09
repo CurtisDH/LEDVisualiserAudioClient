@@ -82,146 +82,159 @@ public class AudClient
 
         dataFft = new double[fftPoints / 2];
 
+        double magnitude = 0;
+        int frequency = 0;
         for (int i = 0; i < fftPoints / 2; i++)
         {
             double fftLeft = Math.Abs(fftFull[i].X + fftFull[i].Y);
             double fftRight = Math.Abs(fftFull[fftPoints - i - 1].X + fftFull[fftPoints - i - 1].Y);
             dataFft[i] = fftLeft + fftRight;
+            if (!(magnitude < dataFft[i])) continue;
+
+            magnitude = dataFft[i];
+            frequency = i * sampleRate / fftPoints;
         }
 
-        var y = dataFft.Max();
-        if (y > _threshold)
+
+        if (magnitude > _threshold)
         {
-            if (Program.debug)
-                Console.WriteLine($"{y}, {y / 4}");
             byte colourR = 0;
             byte colourG = 0;
             byte colourB = 0;
             byte delay = 0;
             // dividing for reduced brightness
-            var calc = (byte)(y / 32);
-            // TODO, this is gross
-            switch (y / 4)
+            // var calc = (byte)(magnitude / 32);
+
+            var calc = (byte)(magnitude / 32);
+            if (Program.debug)
             {
-                case > 0 and < 21:
+                Console.WriteLine($"Max magnitude: {magnitude}, At Frequency: {frequency}  Calc:{calc}");
+            }
+
+            // TODO, this is still gross
+            // Widen the frequency band to reduce the flickering? 200 - 300 instead of 100 jumps?
+            switch (frequency)
+            {
+                case >= 0 and <= 100:
                     colourR = calc;
                     colourG = 0;
                     colourB = 0;
                     break;
-                case > 21 and < 43:
+                case >= 100 and <= 200:
                     colourR = calc;
                     colourG = 0;
                     colourB = (byte)(calc / 2);
                     break;
-                case > 43 and < 64:
+                case >= 200 and <= 300:
                     colourR = (byte)(calc / 1.25);
                     colourG = 0;
                     colourB = calc;
 
                     break;
-                case > 64 and < 86:
+                case >= 300 and <= 400:
                     colourR = (byte)(calc / 4);
                     colourG = 0;
                     colourB = calc;
 
                     break;
-                case > 86 and < 107:
+                case >= 400 and <= 500:
                     colourR = 0;
                     colourG = calc;
                     colourB = (byte)(calc / 2);
 
                     break;
-                case > 107 and < 129:
+                case >= 600 and <= 700:
                     colourR = 0;
                     colourG = calc;
                     colourB = (byte)(calc / 1.25);
 
                     break;
-                case > 129 and < 150:
+                case >= 700 and <= 800:
                     colourR = 0;
                     colourG = calc;
                     colourB = 0;
 
                     break;
-                case > 150 and < 172:
+                case >= 800 and <= 900:
                     colourR = (byte)(calc / 2);
                     colourG = calc;
                     colourB = 0;
 
                     break;
-                case > 172 and < 193:
+                case >= 1000 and <= 1100:
                     colourR = (byte)(calc / 3);
                     colourG = calc;
                     colourB = 0;
 
                     break;
-                case > 193 and < 215:
+                case >= 1100 and <= 1200:
                     colourR = calc;
                     colourG = (byte)(calc / 2);
                     colourB = 0;
 
                     break;
-                case > 215 and < 237:
+                case >= 1200 and <= 1300:
                     colourR = calc;
                     colourG = (byte)(calc / 3);
                     colourB = 0;
 
                     break;
-                case > 237 and < 258:
+                case >= 1300 and <= 1400:
                     colourR = calc;
                     colourG = (byte)(calc / 4);
                     colourB = 0;
 
                     break;
-                case > 258 and < 280:
+                case >= 1400 and <= 1500:
                     colourR = (byte)(calc / 4);
                     colourG = calc;
                     colourB = (byte)(calc / 1.2);
 
                     break;
-                case > 280 and < 301:
+                case >= 1600 and <= 1700:
                     colourR = 0;
                     colourG = 0;
                     colourB = calc;
 
                     break;
-                case > 301 and 323:
+                case >= 1700 and <= 1800:
                     colourR = 0;
                     colourG = calc;
                     colourB = 0;
 
                     break;
-                case > 323 and < 344:
+                case >= 1900 and <= 2000:
                     colourR = 0;
                     colourG = calc;
                     colourB = (byte)(calc / 4);
 
                     break;
-                case > 344 and < 366:
+                case >= 2000 and <= 2100:
                     colourR = 0;
                     colourG = calc;
                     colourB = (byte)(calc / 1.25);
 
                     break;
-                case > 366 and < 400:
+                case >= 2100 and <= 2200:
                     colourR = 0;
                     colourG = (byte)(calc / 2);
                     colourB = calc;
 
                     break;
                 default:
+                    if (Program.debug)
+                        Console.WriteLine($"Default, Frequency:{frequency}");
                     colourR = calc;
                     colourG = calc;
                     colourB = calc;
                     break;
             }
-            // TODO send 'off' packet, with a boolean to prevent spam
+
 
             byte brightness = calc;
             byte numLeds = (byte)(calc / 2);
 
             byte[] meaningfulData = new[] { numLeds, colourR, colourG, colourB, brightness, delay };
-            //Console.WriteLine(y);
             var networkClient = new NetClient(ip, port);
             networkClient.SendData(meaningfulData);
             sentRealPacket = true;
@@ -234,7 +247,6 @@ public class AudClient
             byte colourB = 0;
             byte delay = 0;
             byte[] meaningfulData = new[] { (byte)0, colourR, colourG, colourB, (byte)0, delay };
-            //Console.WriteLine(y);
             var networkClient = new NetClient(ip, port);
             networkClient.SendData(meaningfulData);
             sentRealPacket = false;
