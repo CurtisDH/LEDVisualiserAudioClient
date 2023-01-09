@@ -66,7 +66,15 @@ public class AudClient
         NAudio.Dsp.Complex[] fftFull = new NAudio.Dsp.Complex[fftPoints];
         for (int i = 0; i < fftPoints; i++)
         {
-            fftFull[i].X = (float)(dataPcm[i] * NAudio.Dsp.FastFourierTransform.HammingWindow(i, fftPoints));
+            try
+            {
+                fftFull[i].X = (float)(dataPcm[i] * NAudio.Dsp.FastFourierTransform.HammingWindow(i, fftPoints));
+            }
+            catch
+            {
+                // ignored -- Prevents the program from breaking upon long audio pauses.
+                // (Originally thought this was just a bluetooth audio device issue but have traced it back to here)
+            }
         }
 
         NAudio.Dsp.FastFourierTransform.FFT(true, (int)Math.Log(fftPoints, 2.0), fftFull);
