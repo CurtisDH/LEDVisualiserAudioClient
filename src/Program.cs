@@ -8,12 +8,19 @@ namespace AudioClient
         public static bool debug = false;
         private static double defaultThreshold = 75; // this is kinda like volume
 
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
             if (args.Contains("debug"))
             {
                 debug = true;
                 Console.WriteLine("Debug mode enabled. Parsing additional arguments");
+                Console.WriteLine("Running tests");
+                var Led = new LedStrip(150);
+                Led.IncrementStrip(Color.Red);
+                Led.IncrementStrip(Color.FromArgb(0, 255, 0));
+                Led.IncrementStrip(Color.Blue);
+                Led.IncrementStrip(Color.Crimson);
+                Led.ConvertByteArrayToColorArray(Led.GetByteArray());
             }
 
             if (args.Length < 1)
@@ -31,7 +38,7 @@ namespace AudioClient
                     Console.WriteLine($"###WARNING###");
 
                     var audioAudClient = new AudClient(defaultThreshold, ip, 5555);
-                    audioAudClient.Init();
+                    await audioAudClient.Init();
                     return;
                 }
 

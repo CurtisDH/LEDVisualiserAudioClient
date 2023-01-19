@@ -24,11 +24,27 @@ public class LedStrip
         }
 
         sw.Stop();
+        if (Program.debug)
+            Console.WriteLine(sw.Elapsed);
+    }
+
+    public void IncrementStrip()
+    {
+        Stopwatch sw = new Stopwatch();
+        sw.Start();
+        for (int i = Strip.Length - 2; i >= 0; i--)
+        {
+            Strip[i + 1] = Strip[i];
+        }
+
+        sw.Stop();
         Console.WriteLine(sw.Elapsed);
     }
 
     public byte[] GetByteArray()
     {
+        Stopwatch sw = new Stopwatch();
+
         byte[] bytes = new byte[Strip.Length * 3];
         for (int i = 0; i < Strip.Length; i++)
         {
@@ -37,6 +53,10 @@ public class LedStrip
             bytes[index + 1] = Strip[i].G;
             bytes[index + 2] = Strip[i].B;
         }
+
+        sw.Stop();
+        if (Program.debug)
+            Console.WriteLine(sw.Elapsed);
 
         return bytes;
     }

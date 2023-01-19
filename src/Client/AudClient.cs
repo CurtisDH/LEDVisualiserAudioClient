@@ -26,11 +26,13 @@ public class AudClient
         strip = new LedStrip(stripSize);
     }
 
-    public void Init()
+    public async Task Init()
     {
+        var loop = UpdateLoop();
         using (var capture = new WasapiLoopbackCapture())
 
         {
+            Console.WriteLine("INIT!!");
             capture.WaveFormat = new WaveFormat(SampleRate, 16, 1);
             _captureWf = capture.WaveFormat;
             // Set up an event handler to receive the audio data
@@ -45,6 +47,20 @@ public class AudClient
 
             capture.DataAvailable -= OnDataAvailable;
             Init();
+            await loop;
+        }
+    }
+
+    private async Task UpdateLoop()
+    {
+        while (true)
+        {
+            // If we don't delay the device we are sending to will create a backlog of commands.
+            strip.IncrementStrip();
+            var networkClient = new NetClient(ip, port);
+            networkClient.SendData(strip.GetByteArray());
+            await Task.Delay(5);
+
         }
     }
 
@@ -106,7 +122,6 @@ public class AudClient
             byte colourR = 0;
             byte colourG = 0;
             byte colourB = 0;
-            byte delay = 0;
             // dividing for reduced brightness
             // var calc = (byte)(magnitude / 32);
 
@@ -237,8 +252,7 @@ public class AudClient
 
             var colour = Color.FromArgb(colourR, colourB, colourG);
             strip.IncrementStrip(colour);
-            
-            
+
             var networkClient = new NetClient(ip, port);
             networkClient.SendData(strip.GetByteArray());
             _sentRealPacket = true;
@@ -246,13 +260,9 @@ public class AudClient
         }
         else if (_sentRealPacket)
         {
-            byte colourR = 0;
-            byte colourG = 0;
-            byte colourB = 0;
-            byte delay = 0;
-            byte[] meaningfulData = new[] { (byte)0, colourR, colourG, colourB, (byte)0, delay };
+            strip.IncrementStrip(Color.Black);
             var networkClient = new NetClient(ip, port);
-            networkClient.SendData(meaningfulData);
+            networkClient.SendData(strip.GetByteArray());
             _sentRealPacket = false;
         }
     }
