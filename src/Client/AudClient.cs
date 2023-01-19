@@ -235,16 +235,12 @@ public class AudClient
                     break;
             }
 
-
-            byte brightness = calc;
-            byte numLeds = (byte)(calc / 2);
             var colour = Color.FromArgb(colourR, colourB, colourG);
             strip.IncrementStrip(colour);
             
-
-            byte[] meaningfulData = new[] { numLeds, colourR, colourG, colourB, brightness, delay };
+            
             var networkClient = new NetClient(ip, port);
-            networkClient.SendData(meaningfulData);
+            networkClient.SendData(strip.GetByteArray());
             _sentRealPacket = true;
             return;
         }

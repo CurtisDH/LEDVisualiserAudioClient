@@ -43,13 +43,21 @@ public class LedStrip
 
     public Color[] ConvertByteArrayToColorArray(byte[] bytes)
     {
+        Console.WriteLine(bytes.Length);
         Color[] colors = new Color[bytes.Length / 3];
         for (int i = 0; i < bytes.Length / 3; i++)
         {
-            var byteArrayIndex = i + 3;
+            Console.WriteLine(i);
+            Console.WriteLine(i * 3);
+            var byteArrayIndex = i * 3;
 
             colors[i] = Color.FromArgb(
                 bytes[byteArrayIndex], bytes[byteArrayIndex + 1], bytes[byteArrayIndex + 2]);
+        }
+
+        foreach (var VARIABLE in colors)
+        {
+            Console.WriteLine(VARIABLE);
         }
 
         return colors;
