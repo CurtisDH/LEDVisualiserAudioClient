@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Drawing;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace AudioClient.Client;
 
@@ -24,7 +23,7 @@ public class LedStrip
         }
 
         sw.Stop();
-        if (Program.debug)
+        if (Program.Debug)
             Console.WriteLine(sw.Elapsed);
     }
 
@@ -38,7 +37,8 @@ public class LedStrip
         }
 
         sw.Stop();
-        Console.WriteLine(sw.Elapsed);
+        if (Program.Debug)
+            Console.WriteLine(sw.Elapsed);
     }
 
     public byte[] GetByteArray()
@@ -55,7 +55,7 @@ public class LedStrip
         }
 
         sw.Stop();
-        if (Program.debug)
+        if (Program.Debug)
             Console.WriteLine(sw.Elapsed);
 
         return bytes;

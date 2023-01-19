@@ -5,14 +5,14 @@ namespace AudioClient
 {
     internal static class Program
     {
-        public static bool debug = false;
+        public static bool Debug = false;
         private static double defaultThreshold = 75; // this is kinda like volume
 
         private static async Task Main(string[] args)
         {
             if (args.Contains("debug"))
             {
-                debug = true;
+                Debug = true;
                 Console.WriteLine("Debug mode enabled. Parsing additional arguments");
                 Console.WriteLine("Running tests");
                 var Led = new LedStrip(150);

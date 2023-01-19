@@ -1,9 +1,8 @@
 using System.Drawing;
-using AudioClient.Client;
-using NAudio.Dsp;
+using AudioClient.Network;
 using NAudio.Wave;
 
-namespace AudioClient;
+namespace AudioClient.Client;
 
 public class AudClient
 {
@@ -126,7 +125,7 @@ public class AudClient
             // var calc = (byte)(magnitude / 32);
 
             var calc = (byte)(magnitude / 32);
-            if (Program.debug)
+            if (Program.Debug)
             {
                 Console.WriteLine($"Max magnitude: {magnitude}, At Frequency: {frequency}  Calc:{calc}");
             }
@@ -242,7 +241,7 @@ public class AudClient
 
                     break;
                 default:
-                    if (Program.debug)
+                    if (Program.Debug)
                         Console.WriteLine($"Default, Frequency:{frequency}");
                     colourR = calc;
                     colourG = calc;
