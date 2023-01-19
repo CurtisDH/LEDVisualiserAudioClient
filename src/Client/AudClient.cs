@@ -1,3 +1,5 @@
+using System.Drawing;
+using AudioClient.Client;
 using NAudio.Dsp;
 using NAudio.Wave;
 
@@ -6,19 +8,22 @@ namespace AudioClient;
 public class AudClient
 {
     private readonly double _threshold;
-    private const int sampleRate = 44100;
-    private Int16[] dataPcm;
-    double[] dataFft;
-    private WaveFormat captureWF;
+    private const int SampleRate = 44100;
+    private Int16[] _dataPcm;
+    double[] _dataFft;
+    private WaveFormat _captureWf;
     private string ip;
-    private bool sentRealPacket;
+    private bool _sentRealPacket;
     private int port;
+    private LedStrip strip;
 
-    public AudClient(double threshold, string ip, int port)
+
+    public AudClient(double threshold, string ip, int port, int stripSize = 150)
     {
         _threshold = threshold;
         this.ip = ip;
         this.port = port;
+        strip = new LedStrip(stripSize);
     }
 
     public void Init()
@@ -26,8 +31,8 @@ public class AudClient
         using (var capture = new WasapiLoopbackCapture())
 
         {
-            capture.WaveFormat = new WaveFormat(sampleRate, 16, 1);
-            captureWF = capture.WaveFormat;
+            capture.WaveFormat = new WaveFormat(SampleRate, 16, 1);
+            _captureWf = capture.WaveFormat;
             // Set up an event handler to receive the audio data
             capture.DataAvailable += OnDataAvailable;
 
@@ -46,20 +51,20 @@ public class AudClient
 
     void OnDataAvailable(object sender, WaveInEventArgs e)
     {
-        int bytesPerSample = captureWF.BitsPerSample / 8;
+        int bytesPerSample = _captureWf.BitsPerSample / 8;
         int samplesRecorded = e.BytesRecorded / bytesPerSample;
 
         // reallocating seems stupid here, but the values vary in size.
         // perhaps it is better to use a value that will fit the size regardless?
-        dataPcm = new Int16[samplesRecorded];
+        _dataPcm = new Int16[samplesRecorded];
         for (int i = 0; i < samplesRecorded; i++)
         {
-            dataPcm[i] = BitConverter.ToInt16(e.Buffer, i * bytesPerSample);
+            _dataPcm[i] = BitConverter.ToInt16(e.Buffer, i * bytesPerSample);
         }
 
         // the PCM size to be analyzed with FFT must be a power of 2
         int fftPoints = 2;
-        while (fftPoints * 2 <= dataPcm.Length)
+        while (fftPoints * 2 <= _dataPcm.Length)
             fftPoints *= 2;
 
         // apply a Hamming window function as we load the FFT array then calculate the FFT
@@ -68,7 +73,7 @@ public class AudClient
         {
             try
             {
-                fftFull[i].X = (float)(dataPcm[i] * NAudio.Dsp.FastFourierTransform.HammingWindow(i, fftPoints));
+                fftFull[i].X = (float)(_dataPcm[i] * NAudio.Dsp.FastFourierTransform.HammingWindow(i, fftPoints));
             }
             catch
             {
@@ -80,7 +85,7 @@ public class AudClient
         NAudio.Dsp.FastFourierTransform.FFT(true, (int)Math.Log(fftPoints, 2.0), fftFull);
 
 
-        dataFft = new double[fftPoints / 2];
+        _dataFft = new double[fftPoints / 2];
 
         double magnitude = 0;
         int frequency = 0;
@@ -88,11 +93,11 @@ public class AudClient
         {
             double fftLeft = Math.Abs(fftFull[i].X + fftFull[i].Y);
             double fftRight = Math.Abs(fftFull[fftPoints - i - 1].X + fftFull[fftPoints - i - 1].Y);
-            dataFft[i] = fftLeft + fftRight;
-            if (!(magnitude < dataFft[i])) continue;
+            _dataFft[i] = fftLeft + fftRight;
+            if (!(magnitude < _dataFft[i])) continue;
 
-            magnitude = dataFft[i];
-            frequency = i * sampleRate / fftPoints;
+            magnitude = _dataFft[i];
+            frequency = i * SampleRate / fftPoints;
         }
 
 
@@ -233,14 +238,17 @@ public class AudClient
 
             byte brightness = calc;
             byte numLeds = (byte)(calc / 2);
+            var colour = Color.FromArgb(colourR, colourB, colourG);
+            strip.IncrementStrip(colour);
+            
 
             byte[] meaningfulData = new[] { numLeds, colourR, colourG, colourB, brightness, delay };
             var networkClient = new NetClient(ip, port);
             networkClient.SendData(meaningfulData);
-            sentRealPacket = true;
+            _sentRealPacket = true;
             return;
         }
-        else if (sentRealPacket)
+        else if (_sentRealPacket)
         {
             byte colourR = 0;
             byte colourG = 0;
@@ -249,7 +257,7 @@ public class AudClient
             byte[] meaningfulData = new[] { (byte)0, colourR, colourG, colourB, (byte)0, delay };
             var networkClient = new NetClient(ip, port);
             networkClient.SendData(meaningfulData);
-            sentRealPacket = false;
+            _sentRealPacket = false;
         }
     }
 }

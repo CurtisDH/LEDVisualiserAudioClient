@@ -1,4 +1,8 @@
-﻿namespace AudioClient
+﻿using System.Drawing;
+using AudioClient.Client;
+using AudioClient.Utility;
+
+namespace AudioClient
 {
     internal static class Program
     {
@@ -7,6 +11,19 @@
 
         private static void Main(string[] args)
         {
+            var l = new LedStrip(150);
+            l.IncrementStrip((Color.Aqua));
+
+            l.IncrementStrip((Color.Aqua));
+            l.IncrementStrip((Color.Aqua));
+            l.IncrementStrip((Color.Aqua));
+
+            var bytes = l.GetByteArray();
+            l.ConvertByteArrayToColorArray(bytes);
+
+
+            Console.WriteLine($"{bytes[0]}  {bytes[1]}  {bytes[2]}");
+
             if (args.Contains("debug"))
             {
                 debug = true;
