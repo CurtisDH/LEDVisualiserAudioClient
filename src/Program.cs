@@ -67,8 +67,12 @@ namespace AudioClient
                         var targetIP = Console.ReadLine();
                         Console.WriteLine("Provide the target port");
                         port = int.Parse(Console.ReadLine());
+                        Console.WriteLine("Enter Strip Size (integer value expected)");
+                        var stripSize = int.Parse(Console.ReadLine());
+                        Console.WriteLine("Enter Strip speed (int expected)");
+                        var speed = int.Parse(Console.ReadLine());
                         Console.WriteLine("Attempting to start client...");
-                        var audioAudClient = new AudClient(threshold, targetIP, port);
+                        var audioAudClient = new AudClient(threshold, targetIP, port, stripSize, speed);
                         audioAudClient.Init();
 
                         break;

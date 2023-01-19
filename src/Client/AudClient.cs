@@ -8,26 +8,30 @@ public class AudClient
 {
     private readonly double _threshold;
     private const int SampleRate = 44100;
-    private Int16[] _dataPcm;
-    double[] _dataFft;
+    private short[] _dataPcm;
+    private double[] _dataFft;
     private WaveFormat _captureWf;
-    private string ip;
+    private readonly string _ip;
     private bool _sentRealPacket;
-    private int port;
-    private LedStrip strip;
+    private readonly int _port;
+    private readonly LedStrip _strip;
+    private int _speed;
+    private Task? _loop = null;
 
 
-    public AudClient(double threshold, string ip, int port, int stripSize = 150)
+    public AudClient(double threshold, string ip, int port, int stripSize = 150, int speed = 25)
     {
         _threshold = threshold;
-        this.ip = ip;
-        this.port = port;
-        strip = new LedStrip(stripSize);
+        this._ip = ip;
+        this._port = port;
+        _strip = new LedStrip(stripSize);
+        this._speed = speed;
     }
 
+    // ReSharper disable once FunctionRecursiveOnAllPaths
     public async Task Init()
     {
-        var loop = UpdateLoop();
+        _loop = UpdateLoop();
         using (var capture = new WasapiLoopbackCapture())
 
         {
@@ -35,7 +39,7 @@ public class AudClient
             capture.WaveFormat = new WaveFormat(SampleRate, 16, 1);
             _captureWf = capture.WaveFormat;
             // Set up an event handler to receive the audio data
-            capture.DataAvailable += OnDataAvailable;
+            capture.DataAvailable += OnDataAvailable!;
 
             // Start capturing audio
             capture.StartRecording();
@@ -44,21 +48,29 @@ public class AudClient
             Console.WriteLine("Press any key to reconnect to audio");
             Console.ReadKey();
 
-            capture.DataAvailable -= OnDataAvailable;
+            capture.DataAvailable -= OnDataAvailable!;
+#pragma warning disable CS4014
             Init();
-            await loop;
+#pragma warning restore CS4014
+            await _loop!;
         }
     }
 
-    private async Task UpdateLoop()
+    private async Task? UpdateLoop()
     {
         while (true)
         {
+            if (!_strip.AllLedsOff())
+            {
+                _strip.IncrementStrip();
+
+
+                var networkClient = new NetClient(_ip, _port);
+
+                networkClient.SendData(_strip.GetByteArray());
+            }
             // If we don't delay the device we are sending to will create a backlog of commands.
-            strip.IncrementStrip();
-            var networkClient = new NetClient(ip, port);
-            networkClient.SendData(strip.GetByteArray());
-            await Task.Delay(5);
+            await Task.Delay(_speed);
 
         }
     }
@@ -250,18 +262,18 @@ public class AudClient
             }
 
             var colour = Color.FromArgb(colourR, colourB, colourG);
-            strip.IncrementStrip(colour);
+            _strip.IncrementStrip(colour);
 
-            var networkClient = new NetClient(ip, port);
-            networkClient.SendData(strip.GetByteArray());
+            var networkClient = new NetClient(_ip, _port);
+            networkClient.SendData(_strip.GetByteArray());
             _sentRealPacket = true;
             return;
         }
         else if (_sentRealPacket)
         {
-            strip.IncrementStrip(Color.Black);
-            var networkClient = new NetClient(ip, port);
-            networkClient.SendData(strip.GetByteArray());
+            _strip.IncrementStrip(Color.Black);
+            var networkClient = new NetClient(_ip, _port);
+            networkClient.SendData(_strip.GetByteArray());
             _sentRealPacket = false;
         }
     }

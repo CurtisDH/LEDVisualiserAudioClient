@@ -61,6 +61,19 @@ public class LedStrip
         return bytes;
     }
 
+    public bool AllLedsOff()
+    {
+        foreach (var color in Strip)
+        {
+            if (color.R > 0 || color.G > 0 || color.B > 0)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public Color[] ConvertByteArrayToColorArray(byte[] bytes)
     {
         Console.WriteLine(bytes.Length);
