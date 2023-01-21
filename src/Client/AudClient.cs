@@ -130,9 +130,6 @@ public class AudClient
 
         if (magnitude > _threshold)
         {
-            byte colourR = 0;
-            byte colourG = 0;
-            byte colourB = 0;
             // dividing for reduced brightness
             // var calc = (byte)(magnitude / 32);
 
@@ -142,126 +139,52 @@ public class AudClient
                 Console.WriteLine($"Max magnitude: {magnitude}, At Frequency: {frequency}  Calc:{calc}");
             }
 
+            byte colourR = 0;
+            byte colourB = 0;
+            byte colourG = 0;
             // TODO, this is still gross
             // Widen the frequency band to reduce the flickering? 200 - 300 instead of 100 jumps?
-            switch (frequency)
+            Color[] colors = new Color[]
             {
-                case >= 0 and <= 100:
-                    colourR = calc;
-                    colourG = 0;
-                    colourB = 0;
-                    break;
-                case >= 100 and <= 200:
-                    colourR = calc;
-                    colourG = 0;
-                    colourB = (byte)(calc / 2);
-                    break;
-                case >= 200 and <= 300:
-                    colourR = (byte)(calc / 1.25);
-                    colourG = 0;
-                    colourB = calc;
+                Color.FromArgb(calc,0,0),
+                Color.FromArgb(calc,0,(byte)(calc/2)),
+                Color.FromArgb((byte)(calc/1.25),0,0),
+                Color.FromArgb((byte)(calc/4),0,calc),
+                Color.FromArgb((byte)(calc/4),0,calc),
+                Color.FromArgb(0,calc,(byte)(calc/1.25)),
+                Color.FromArgb(0,calc,0),
+                Color.FromArgb((byte)(calc/2),calc,0),
+                Color.FromArgb((byte)(calc/3),calc,0),
+                Color.FromArgb(calc,(byte)(calc/2),0),
+                Color.FromArgb(calc, (byte)(calc/3),0),
+                Color.FromArgb(calc,(byte)(calc/4),0),
+                Color.FromArgb((byte)(calc/4),calc,(byte)(calc/1.2)),
+                Color.FromArgb(0,0,calc),
+                Color.FromArgb(0,calc,0),
+                Color.FromArgb(0,calc,(byte)(calc/1.25)),
+                Color.FromArgb(0,(byte)(calc/2),calc)
 
-                    break;
-                case >= 300 and <= 400:
-                    colourR = (byte)(calc / 4);
-                    colourG = 0;
-                    colourB = calc;
+            };
+            // assign out of range values
 
-                    break;
-                case >= 400 and <= 500:
-                    colourR = 0;
-                    colourG = calc;
-                    colourB = (byte)(calc / 2);
+            colourR = calc;
+            colourG = calc;
+            colourB = calc;
 
-                    break;
-                case >= 600 and <= 700:
-                    colourR = 0;
-                    colourG = calc;
-                    colourB = (byte)(calc / 1.25);
+            for (int i = 0; i < colors.Length; i++)
+            {
+                var freqRange = i * 100;
 
-                    break;
-                case >= 700 and <= 800:
-                    colourR = 0;
-                    colourG = calc;
-                    colourB = 0;
-
-                    break;
-                case >= 800 and <= 900:
-                    colourR = (byte)(calc / 2);
-                    colourG = calc;
-                    colourB = 0;
-
-                    break;
-                case >= 1000 and <= 1100:
-                    colourR = (byte)(calc / 3);
-                    colourG = calc;
-                    colourB = 0;
-
-                    break;
-                case >= 1100 and <= 1200:
-                    colourR = calc;
-                    colourG = (byte)(calc / 2);
-                    colourB = 0;
-
-                    break;
-                case >= 1200 and <= 1300:
-                    colourR = calc;
-                    colourG = (byte)(calc / 3);
-                    colourB = 0;
-
-                    break;
-                case >= 1300 and <= 1400:
-                    colourR = calc;
-                    colourG = (byte)(calc / 4);
-                    colourB = 0;
-
-                    break;
-                case >= 1400 and <= 1500:
-                    colourR = (byte)(calc / 4);
-                    colourG = calc;
-                    colourB = (byte)(calc / 1.2);
-
-                    break;
-                case >= 1600 and <= 1700:
-                    colourR = 0;
-                    colourG = 0;
-                    colourB = calc;
-
-                    break;
-                case >= 1700 and <= 1800:
-                    colourR = 0;
-                    colourG = calc;
-                    colourB = 0;
-
-                    break;
-                case >= 1900 and <= 2000:
-                    colourR = 0;
-                    colourG = calc;
-                    colourB = (byte)(calc / 4);
-
-                    break;
-                case >= 2000 and <= 2100:
-                    colourR = 0;
-                    colourG = calc;
-                    colourB = (byte)(calc / 1.25);
-
-                    break;
-                case >= 2100 and <= 2200:
-                    colourR = 0;
-                    colourG = (byte)(calc / 2);
-                    colourB = calc;
-
-                    break;
-                default:
-                    if (Program.Debug)
-                        Console.WriteLine($"Default, Frequency:{frequency}");
-                    colourR = calc;
-                    colourG = calc;
-                    colourB = calc;
-                    break;
+                if (frequency <= freqRange && frequency >= i * 75)
+                {
+                    colourR = colors[i].R;
+                    colourB = colors[i].G;
+                    colourG = colors[i].B;
+                }
             }
 
             var colour = Color.FromArgb(colourR, colourB, colourG);
+            Console.WriteLine($"Colour:{colour}");
             _strip.IncrementStrip(colour);
 
             var networkClient = new NetClient(_ip, _port);
