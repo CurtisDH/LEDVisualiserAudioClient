@@ -1,5 +1,6 @@
 using System.Drawing;
 using AudioClient.Network;
+using AudioClient.Utility;
 using NAudio.Wave;
 
 namespace AudioClient.Client;
@@ -15,11 +16,56 @@ public class AudClient
     private bool _sentRealPacket;
     private readonly int _port;
     private readonly LedStrip _strip;
-    private int _speed;
-    private Task? _loop = null;
+    private readonly int _speed;
+    private Task? _loop;
+
+    private const int Increment = 25;
+
+    // colours start from freq 0 and jumps in x increments
+    // TODO change the colour palette based on the speed of the music
+    /*
+     * Deep Blue: This color evokes feelings of calm and tranquility, making it a great choice for slow, mellow music.
+
+    Electric Purple: This color is bold and vibrant, making it a great choice for upbeat, high-energy music.
+
+    Forest Green: This color is earthy and grounding, making it a great choice for music with a more organic or natural feel.
+
+    Bright Yellow: This color is cheerful and uplifting, making it a great choice for happy, positive music.
+
+    Burgundy Red: This color is rich and intense, making it a great choice for dramatic or emotional music.
+
+    Neutral gray: This color is versatile and can work well with a variety of music styles and frequencies.
+     */
+    private readonly Color[] _colors = new Color[]
+    {
+        ColourConvert.NormaliseColour(Color.Red),
+        ColourConvert.NormaliseColour(Color.DarkRed),
+        ColourConvert.NormaliseColour(Color.Purple),
+        ColourConvert.NormaliseColour(Color.Salmon),
+        ColourConvert.NormaliseColour(Color.Crimson),
+        ColourConvert.NormaliseColour(Color.Navy),
+        ColourConvert.NormaliseColour(Color.Blue),
+        ColourConvert.NormaliseColour(Color.BlueViolet),
+        ColourConvert.NormaliseColour(Color.SkyBlue),
+        ColourConvert.NormaliseColour(Color.DeepSkyBlue),
+        ColourConvert.NormaliseColour(Color.HotPink),
+        ColourConvert.NormaliseColour(Color.DeepPink),
+        ColourConvert.NormaliseColour(Color.Fuchsia),
+        ColourConvert.NormaliseColour(Color.Yellow),
+        ColourConvert.NormaliseColour(Color.Yellow),
+        ColourConvert.NormaliseColour(Color.Yellow),
+        ColourConvert.NormaliseColour(Color.Yellow),
+        ColourConvert.NormaliseColour(Color.Yellow),
+        ColourConvert.NormaliseColour(Color.Red),
+        ColourConvert.NormaliseColour(Color.Red),
+        ColourConvert.NormaliseColour(Color.Red),
+        ColourConvert.NormaliseColour(Color.Red),
+        ColourConvert.NormaliseColour(Color.Red),
+        ColourConvert.NormaliseColour(Color.Red)
+    };
 
 
-    public AudClient(double threshold, string ip, int port, int stripSize = 150, int speed = 25)
+    public AudClient(double threshold, string ip, int port, int stripSize = 150, int speed = 15)
     {
         _threshold = threshold;
         this._ip = ip;
@@ -69,9 +115,9 @@ public class AudClient
 
                 networkClient.SendData(_strip.GetByteArray());
             }
+
             // If we don't delay the device we are sending to will create a backlog of commands.
             await Task.Delay(_speed);
-
         }
     }
 
@@ -121,8 +167,7 @@ public class AudClient
             double fftLeft = Math.Abs(fftFull[i].X + fftFull[i].Y);
             double fftRight = Math.Abs(fftFull[fftPoints - i - 1].X + fftFull[fftPoints - i - 1].Y);
             _dataFft[i] = fftLeft + fftRight;
-            if (!(magnitude < _dataFft[i])) continue;
-
+            if ((magnitude > _dataFft[i])) continue;
             magnitude = _dataFft[i];
             frequency = i * SampleRate / fftPoints;
         }
@@ -130,6 +175,7 @@ public class AudClient
 
         if (magnitude > _threshold)
         {
+            Console.WriteLine(frequency);
             // dividing for reduced brightness
             // var calc = (byte)(magnitude / 32);
 
@@ -142,49 +188,25 @@ public class AudClient
             byte colourR = 0;
             byte colourB = 0;
             byte colourG = 0;
-            // TODO, this is still gross
             // Widen the frequency band to reduce the flickering? 200 - 300 instead of 100 jumps?
-            Color[] colors = new Color[]
-            {
-                Color.FromArgb(calc,0,0),
-                Color.FromArgb(calc,0,(byte)(calc/2)),
-                Color.FromArgb((byte)(calc/1.25),0,0),
-                Color.FromArgb((byte)(calc/4),0,calc),
-                Color.FromArgb((byte)(calc/4),0,calc),
-                Color.FromArgb(0,calc,(byte)(calc/1.25)),
-                Color.FromArgb(0,calc,0),
-                Color.FromArgb((byte)(calc/2),calc,0),
-                Color.FromArgb((byte)(calc/3),calc,0),
-                Color.FromArgb(calc,(byte)(calc/2),0),
-                Color.FromArgb(calc, (byte)(calc/3),0),
-                Color.FromArgb(calc,(byte)(calc/4),0),
-                Color.FromArgb((byte)(calc/4),calc,(byte)(calc/1.2)),
-                Color.FromArgb(0,0,calc),
-                Color.FromArgb(0,calc,0),
-                Color.FromArgb(0,calc,(byte)(calc/1.25)),
-                Color.FromArgb(0,(byte)(calc/2),calc)
-
-            };
             // assign out of range values
 
             colourR = calc;
             colourG = calc;
             colourB = calc;
-
-            for (int i = 0; i < colors.Length; i++)
+            for (var i = 0; i < _colors.Length; i++)
             {
-                var freqRange = i * 100;
-
-                if (frequency <= freqRange && frequency >= i * 75)
-                {
-                    colourR = colors[i].R;
-                    colourB = colors[i].G;
-                    colourG = colors[i].B;
-                }
+                var freqRange = i * Increment;
+                if (frequency > freqRange || frequency < (i * Increment) / 2) continue;
+                if (Program.Debug)
+                    Console.WriteLine(_colors[i]);
+                colourR = (byte)(_colors[i].R * calc);
+                colourB = (byte)(_colors[i].G * calc);
+                colourG = (byte)(_colors[i].B * calc);
             }
 
             var colour = Color.FromArgb(colourR, colourB, colourG);
-            Console.WriteLine($"Colour:{colour}");
+            //Console.WriteLine($"Colour:{colour}");
             _strip.IncrementStrip(colour);
 
             var networkClient = new NetClient(_ip, _port);
