@@ -166,16 +166,26 @@ public class AudClient
         {
             double fftLeft = Math.Abs(fftFull[i].X + fftFull[i].Y);
             double fftRight = Math.Abs(fftFull[fftPoints - i - 1].X + fftFull[fftPoints - i - 1].Y);
+            //Console.WriteLine(i);
             _dataFft[i] = fftLeft + fftRight;
-            if ((magnitude > _dataFft[i])) continue;
+            if (_dataFft[i] < 1) continue;
+
+            if ((magnitude > _dataFft[i]))
+                continue;
+            
             magnitude = _dataFft[i];
             frequency = i * SampleRate / fftPoints;
         }
+        
+        // TODO dunno wtf is happening but its an annoying bug
+        //  -  after sound is played, frequency jumps seemingly randomly for (**untimed** but around 30 seconds)
+        //  Due to this random jump, when the magnitude condition is met to display the sound on the LED strip
+        //  there is a chance for it to be at the wrong frequency colour representation
 
 
         if (magnitude > _threshold)
         {
-            Console.WriteLine(frequency);
+
             // dividing for reduced brightness
             // var calc = (byte)(magnitude / 32);
 
