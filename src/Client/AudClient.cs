@@ -19,10 +19,11 @@ public class AudClient
     private readonly int _speed;
     private Task? _loop;
 
-    private const int Increment = 25;
+    private const int Increment = 100;
 
     // colours start from freq 0 and jumps in x increments
     // TODO change the colour palette based on the speed of the music
+    // TODO blend colours
     /*
      * Deep Blue: This color evokes feelings of calm and tranquility, making it a great choice for slow, mellow music.
 
@@ -38,30 +39,30 @@ public class AudClient
      */
     private readonly Color[] _colors = new Color[]
     {
+        ColourConvert.NormaliseColour(Color.Black), // First entry ignored.
         ColourConvert.NormaliseColour(Color.Red),
-        ColourConvert.NormaliseColour(Color.DarkRed),
         ColourConvert.NormaliseColour(Color.Purple),
-        ColourConvert.NormaliseColour(Color.Salmon),
+        ColourConvert.NormaliseColour(Color.Brown),
         ColourConvert.NormaliseColour(Color.Crimson),
         ColourConvert.NormaliseColour(Color.Navy),
-        ColourConvert.NormaliseColour(Color.Blue),
+        ColourConvert.NormaliseColour(Color.DeepSkyBlue),
         ColourConvert.NormaliseColour(Color.BlueViolet),
         ColourConvert.NormaliseColour(Color.SkyBlue),
         ColourConvert.NormaliseColour(Color.DeepSkyBlue),
         ColourConvert.NormaliseColour(Color.HotPink),
         ColourConvert.NormaliseColour(Color.DeepPink),
         ColourConvert.NormaliseColour(Color.Fuchsia),
-        ColourConvert.NormaliseColour(Color.Yellow),
-        ColourConvert.NormaliseColour(Color.Yellow),
-        ColourConvert.NormaliseColour(Color.Yellow),
-        ColourConvert.NormaliseColour(Color.Yellow),
-        ColourConvert.NormaliseColour(Color.Yellow),
-        ColourConvert.NormaliseColour(Color.Red),
-        ColourConvert.NormaliseColour(Color.Red),
-        ColourConvert.NormaliseColour(Color.Red),
-        ColourConvert.NormaliseColour(Color.Red),
-        ColourConvert.NormaliseColour(Color.Red),
-        ColourConvert.NormaliseColour(Color.Red)
+        ColourConvert.NormaliseColour(Color.LightBlue),
+        ColourConvert.NormaliseColour(Color.LightBlue),
+        ColourConvert.NormaliseColour(Color.LightBlue),
+        ColourConvert.NormaliseColour(Color.LightBlue),
+        ColourConvert.NormaliseColour(Color.LightBlue),
+        ColourConvert.NormaliseColour(Color.White),
+        ColourConvert.NormaliseColour(Color.White),
+        ColourConvert.NormaliseColour(Color.White),
+        ColourConvert.NormaliseColour(Color.White),
+        ColourConvert.NormaliseColour(Color.White),
+        ColourConvert.NormaliseColour(Color.White)
     };
 
 
@@ -166,17 +167,16 @@ public class AudClient
         {
             double fftLeft = Math.Abs(fftFull[i].X + fftFull[i].Y);
             double fftRight = Math.Abs(fftFull[fftPoints - i - 1].X + fftFull[fftPoints - i - 1].Y);
-            //Console.WriteLine(i);
             _dataFft[i] = fftLeft + fftRight;
             if (_dataFft[i] < 1) continue;
 
             if ((magnitude > _dataFft[i]))
                 continue;
-            
+
             magnitude = _dataFft[i];
             frequency = i * SampleRate / fftPoints;
         }
-        
+
         // TODO dunno wtf is happening but its an annoying bug
         //  -  after sound is played, frequency jumps seemingly randomly for (**untimed** but around 30 seconds)
         //  Due to this random jump, when the magnitude condition is met to display the sound on the LED strip
@@ -185,7 +185,6 @@ public class AudClient
 
         if (magnitude > _threshold)
         {
-
             // dividing for reduced brightness
             // var calc = (byte)(magnitude / 32);
 
@@ -207,12 +206,17 @@ public class AudClient
             for (var i = 0; i < _colors.Length; i++)
             {
                 var freqRange = i * Increment;
-                if (frequency > freqRange || frequency < (i * Increment) / 2) continue;
+                /*Console.WriteLine(freqRange > frequency);
+                Console.WriteLine(freqRange-Increment < frequency);*/
+
+                if (freqRange <= frequency || freqRange - Increment >= frequency) continue;
+
                 if (Program.Debug)
                     Console.WriteLine(_colors[i]);
                 colourR = (byte)(_colors[i].R * calc);
                 colourB = (byte)(_colors[i].G * calc);
                 colourG = (byte)(_colors[i].B * calc);
+                //Console.WriteLine($"freq {frequency}  Selected:{_colors[i]}");
             }
 
             var colour = Color.FromArgb(colourR, colourB, colourG);
