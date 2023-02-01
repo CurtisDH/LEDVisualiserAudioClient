@@ -10,37 +10,21 @@ Run the audio client on the machine that you are wanting to capture audio from. 
 The two options when running the AudioClient are: 'client' and 'server', client will be sending the audio from the device to the target ip and port, server is deprecated
 
 Create a UDP listen server and interpret the received data. [You can see my rough Raspberry Pi python implementation here](https://github.com/CurtisDH/AudioClient/blob/main/run_leds.py)
+<br />
+<br />
+<br />
+**Starting the client using runtime arguments**  
+The following commands can be used when running via command prompt to change the default start settings:  
+-threshold&nbsp;&nbsp;&nbsp;(Double type expected)  How loud a sound has to be before it gets picked up and displayed    
+-ip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(string type expected)  The target IP of the device you want to send the data to  
+-port&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(integer type expected) The target port of ... as above.  
+-strip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(integer type expected) This is the size of your LED strip    
+-speed&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(integer type expected) This is the update rate of LED strip in milliseconds       
 
-**Arguments are supported but not gracefully  (WIP) need to add 2 additonal arguments**  
-If no values are entered it defaults to client with the magnitude threshold set to 75 the target IP: 192.168.1.11  port: 5555  
-Expects arguments in the following order:  
-type: (client/server)  
-<br />
-IF SERVER  (DEPRECATED) Legacy code still exists here but will not function (WIP) refactoring:     
-arg[1]: port (e.g. 5555)  
-arg[2]: byte array size (set to 6 if no modifications have been made.)  
- <br />
-**SERVER EXAMPLE starting program without manual entries via terminal**  
-AudioClient.exe server 5555 6  
-Starts the program as a server, waiting on port 5555, and expecting a byte array size of 6.  
-<br />  
-IF CLIENT:  
-arg[1]: magnitude threshold  
-arg[2]: targetIP (e.g. 192.168.1.11)   
-arg[3]: port (e.g. 5555)   
-Currently the additional arguments are not supported via command line, those being strip_size and speed (int as ms)
-<br />
-**CLIENT EXAMPLE starting program without manual entries via terminal**  
-AudioClient.exe client 75 192.168.11 5555  
-Starts the program as a client, magnitude threshold at 75, ip set to 192.168.11, and the target port being 5555
+Example using command prompt to run the exe:  
+AudioClient.exe -port 5555 -ip 192.168.1.11 -strip 150 -speed 11 -threshold 10
 <br />
 <br />
-<br />
-### Debugging Optional parameter
-adding debug to the end of either, server, or client e.g  
-AudioClient.exe client 75 192.168.11 5555 debug  
-will then log the magnitude value, and adjusted magnitude value as well as other debug prompts.
-
 
 
 #### Byte array order  
