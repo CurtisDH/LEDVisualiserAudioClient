@@ -11,7 +11,8 @@ public class ColourConvert
         float b = ((float)color.B / 255) * 10;
 
         var colour = Color.FromArgb((byte)r, (byte)g, (byte)b);
-        Console.WriteLine(colour);
+        if (Program.Debug)
+            Console.WriteLine(colour);
         return colour;
     }
 }

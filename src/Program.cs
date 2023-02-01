@@ -6,113 +6,65 @@ namespace AudioClient
     internal static class Program
     {
         public static bool Debug = false;
-        private static double defaultThreshold = 75; // this is kinda like volume
 
         private static async Task Main(string[] args)
         {
-            if (args.Contains("debug"))
+            // TODO move this to a json config so the default can be automatically run
+            double threshold = 75;
+            string ip = "192.168.1.11";
+            int port = 5555;
+            int stripSize = 150;
+            int speed = 15;
+
+            // TODO make this reflect the change in the switch statement below
+            string[] runtimeArgs = new[] { "-threshold", "-ip", "-port", "-strip", "-speed" };
+            Console.WriteLine("Available runtime args:");
+            foreach (var arg in runtimeArgs)
             {
-                Debug = true;
-                Console.WriteLine("Debug mode enabled. Parsing additional arguments");
-                Console.WriteLine("Running tests");
-                var Led = new LedStrip(150);
-                Led.IncrementStrip(Color.Red);
-                Led.IncrementStrip(Color.FromArgb(0, 255, 0));
-                Led.IncrementStrip(Color.Blue);
-                Led.IncrementStrip(Color.Crimson);
-                Led.ConvertByteArrayToColorArray(Led.GetByteArray());
+                Console.WriteLine(arg);
             }
 
-            if (args.Length < 1)
+            if (args.Length > 1)
             {
-                Console.WriteLine("No launch arguments were found. Run the default config? (y/n)");
-                var response = Console.ReadLine();
-                if (string.IsNullOrWhiteSpace(response) || response.ToLower()[0] == 'y')
+                Console.WriteLine($"Runtime arguments found attempting to process..");
+                for (var i = 0; i < args.Length; i++)
                 {
-                    string ip = "192.168.1.11";
-                    Console.WriteLine($"###WARNING###");
-                    Console.WriteLine(
-                        $"No arguments provided Starting audio client with target IP address set to:\n{ip}" +
-                        $"\n" +
-                        $"Threshold set to: {defaultThreshold}");
-                    Console.WriteLine($"###WARNING###");
+                    if (args.Length <= i + 1)
+                    {
+                        continue;
+                    }
 
-                    var audioAudClient = new AudClient(defaultThreshold, ip, 5555);
-                    await audioAudClient.Init();
-                    return;
-                }
+                    switch (args[i])
+                    {
+                        case "-threshold":
+                            double.TryParse(args[i + 1], out threshold);
+                            Console.WriteLine($"Volume threshold set to:{threshold}");
+                            break;
+                        case "-ip":
+                            ip = args[i + 1];
+                            Console.WriteLine($"Target IP Address set to:{ip}");
 
-                Console.WriteLine("'n' Selected. Please enter the desired program type (Server/Client)");
-                var res = Console.ReadLine().ToLower();
-                switch (res)
-                {
-                    case "server":
-                        Console.WriteLine("Server was selected. Provide the port");
-                        Console.Write(">");
-                        int.TryParse(Console.ReadLine(), out int port);
-                        Console.WriteLine($"Port set to {port}");
-                        Console.WriteLine("dataSize (EXPECTED BYTE ARRAY SIZE):");
-                        Console.Write(">");
-                        var dataSize = int.Parse(Console.ReadLine());
-                        Console.WriteLine($"DataSize set to {dataSize} bytes");
-                        Console.WriteLine("Enter number of LEDS in your strip (Expected int)");
-                        Console.WriteLine("Attempting to Start server...");
-                        var networkServer = new NetworkServer(port, dataSize);
-                        networkServer.Listen();
-                        break;
-                    case "client":
-                        Console.WriteLine("Client selected. Enter the target magnitude");
-                        float.TryParse(Console.ReadLine(), out float threshold);
-                        Console.WriteLine("Provide the target IP address");
-                        var targetIP = Console.ReadLine();
-                        Console.WriteLine("Provide the target port");
-                        port = int.Parse(Console.ReadLine());
-                        Console.WriteLine("Enter Strip Size (integer value expected)");
-                        var stripSize = int.Parse(Console.ReadLine());
-                        Console.WriteLine("Enter Strip speed (int expected)");
-                        var speed = int.Parse(Console.ReadLine());
-                        Console.WriteLine("Attempting to start client...");
-                        var audioAudClient = new AudClient(threshold, targetIP, port, stripSize, speed);
-                        audioAudClient.Init();
+                            break;
+                        case "-port":
+                            int.TryParse(args[i + 1], out port);
+                            Console.WriteLine($"Target port set to:{port}");
+                            break;
+                        case "-strip":
+                            int.TryParse(args[i + 1], out stripSize);
+                            Console.WriteLine($"LED Strip Size set to:{stripSize}");
+                            break;
+                        case "-speed":
+                            int.TryParse(args[i + 1], out speed);
+                            Console.WriteLine($"Update speed (in ms) set to:{speed}");
 
-                        break;
-                    default:
-                        Console.WriteLine("invalid response, exiting.");
-                        return;
+                            break;
+                    }
                 }
             }
 
-            if (args[0].ToLower() == "server")
-            {
-                Console.WriteLine("Starting as server");
-                Console.WriteLine("Attempting to read additional arguments:");
-                Console.WriteLine("PORT:");
-                var port = int.Parse(args[1]);
-                Console.WriteLine($"Port set to {port}");
-                Console.WriteLine("dataSize (EXPECTED BYTE ARRAY SIZE):");
-                var dataSize = int.Parse(args[2]);
-                Console.WriteLine($"DataSize set to {dataSize} bytes");
-                Console.WriteLine("Starting server...");
-                var networkServer = new NetworkServer(port, dataSize);
-                networkServer.Listen();
-            }
-            else if (args[0].ToLower() == "client")
-            {
-                Console.WriteLine("Starting as client");
-                Console.WriteLine("Attempting to read additional arguments:");
-                Console.WriteLine("Magnitude threshold: (float value expected)");
-                var threshold = float.Parse(args[1]);
-                Console.WriteLine($"Magnitude threshold set to {threshold}");
-                Console.WriteLine("TargetIP: (string value expected)");
-                var targetIP = (args[2]);
-                Console.WriteLine($"TargetIP set to: {targetIP}");
-                Console.WriteLine($"Port: (int value expected)");
-                var port = int.Parse(args[3]);
-                Console.WriteLine($"Port set to: {port})");
-                Console.WriteLine("Starting audio client...");
-                var audioAudClient = new AudClient(threshold, targetIP, port);
-                audioAudClient.Init();
-            }
+            var ac = new AudClient(threshold, ip, port, stripSize, speed);
+            Console.WriteLine("Starting Audio Client");
+            await ac.Init();
         }
     }
 }

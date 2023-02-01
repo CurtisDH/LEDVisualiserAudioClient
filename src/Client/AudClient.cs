@@ -66,7 +66,8 @@ public class AudClient
     };
 
 
-    public AudClient(double threshold, string ip, int port, int stripSize = 150, int speed = 15)
+    public AudClient(double threshold = 75, string ip = "192.168.1.11", int port = 5555, int stripSize = 150,
+        int speed = 15)
     {
         _threshold = threshold;
         this._ip = ip;
