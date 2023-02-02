@@ -36,7 +36,8 @@ public class AudClient
     // ReSharper disable once FunctionRecursiveOnAllPaths
     public async Task Init()
     {
-        _loop = UpdateLoop();
+        _loop ??= UpdateLoop();
+
         using var capture = new WasapiLoopbackCapture();
         Console.WriteLine("INIT!!");
         capture.WaveFormat = new WaveFormat(SampleRate, 16, 1);
@@ -155,7 +156,7 @@ public class AudClient
             }
 
             // Widen the frequency band to reduce the flickering? 200 - 300 instead of 100 jumps?
-            
+
             // assign out of range values
             var colourR = calc;
             var colourG = calc;
