@@ -9,9 +9,9 @@ public class AudClient
 {
     private readonly double _threshold;
     private const int SampleRate = 44100;
-    private short[] _dataPcm;
-    private double[] _dataFft;
-    private WaveFormat _captureWf;
+    private short[]? _dataPcm;
+    private double[]? _dataFft;
+    private WaveFormat? _captureWf;
     private readonly string _ip;
     private bool _sentRealPacket;
     private readonly int _port;
@@ -58,7 +58,7 @@ public class AudClient
         await _loop!;
     }
 
-    private async Task? UpdateLoop()
+    private async Task UpdateLoop()
     {
         while (true)
         {
@@ -75,25 +75,29 @@ public class AudClient
             // If we don't delay the device we are sending to will create a backlog of commands.
             await Task.Delay(_speed);
         }
+        // ReSharper disable once FunctionNeverReturns
     }
 
 
     void OnDataAvailable(object sender, WaveInEventArgs e)
     {
-        int bytesPerSample = _captureWf.BitsPerSample / 8;
-        int samplesRecorded = e.BytesRecorded / bytesPerSample;
-
-        // reallocating seems stupid here, but the values vary in size.
-        // perhaps it is better to use a value that will fit the size regardless?
-        _dataPcm = new Int16[samplesRecorded];
-        for (int i = 0; i < samplesRecorded; i++)
+        if (_captureWf != null)
         {
-            _dataPcm[i] = BitConverter.ToInt16(e.Buffer, i * bytesPerSample);
+            int bytesPerSample = _captureWf.BitsPerSample / 8;
+            int samplesRecorded = e.BytesRecorded / bytesPerSample;
+
+            // reallocating seems stupid here, but the values vary in size.
+            // perhaps it is better to use a value that will fit the size regardless?
+            _dataPcm = new Int16[samplesRecorded];
+            for (int i = 0; i < samplesRecorded; i++)
+            {
+                _dataPcm[i] = BitConverter.ToInt16(e.Buffer, i * bytesPerSample);
+            }
         }
 
         // the PCM size to be analyzed with FFT must be a power of 2
         int fftPoints = 2;
-        while (fftPoints * 2 <= _dataPcm.Length)
+        while (_dataPcm != null && fftPoints * 2 <= _dataPcm.Length)
             fftPoints *= 2;
 
         // apply a Hamming window function as we load the FFT array then calculate the FFT
@@ -102,7 +106,8 @@ public class AudClient
         {
             try
             {
-                fftFull[i].X = (float)(_dataPcm[i] * NAudio.Dsp.FastFourierTransform.HammingWindow(i, fftPoints));
+                if (_dataPcm != null)
+                    fftFull[i].X = (float)(_dataPcm[i] * NAudio.Dsp.FastFourierTransform.HammingWindow(i, fftPoints));
             }
             catch
             {
@@ -149,15 +154,12 @@ public class AudClient
                 Console.WriteLine($"Max magnitude: {magnitude}, At Frequency: {frequency}  Calc:{calc}");
             }
 
-            byte colourR = 0;
-            byte colourB = 0;
-            byte colourG = 0;
             // Widen the frequency band to reduce the flickering? 200 - 300 instead of 100 jumps?
             
             // assign out of range values
-            colourR = calc;
-            colourG = calc;
-            colourB = calc;
+            var colourR = calc;
+            var colourG = calc;
+            var colourB = calc;
             var colours = ColourController.Colours;
             for (var i = 0; i < colours.Length; i++)
             {
@@ -181,7 +183,6 @@ public class AudClient
             var networkClient = new NetClient(_ip, _port);
             networkClient.SendData(_strip.GetByteArray());
             _sentRealPacket = true;
-            return;
         }
         else if (_sentRealPacket)
         {

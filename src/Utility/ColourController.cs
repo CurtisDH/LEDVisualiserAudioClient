@@ -28,13 +28,13 @@ public class ColourController
         float weight = 0.75f;
 
 
-        var initialR = ((float)initial.R * weight);
-        var initialG = ((float)initial.G * weight);
-        var initialB = ((float)initial.B * weight);
+        var initialR = (initial.R * weight);
+        var initialG = (initial.G * weight);
+        var initialB = (initial.B * weight);
 
-        var pR = ((float)previous.R * Math.Abs(weight - 1));
-        var pG = ((float)previous.G * Math.Abs(weight - 1));
-        var pB = ((float)previous.B * Math.Abs(weight - 1));
+        var pR = (previous.R * Math.Abs(weight - 1));
+        var pG = (previous.G * Math.Abs(weight - 1));
+        var pB = (previous.B * Math.Abs(weight - 1));
 
         var calculatedR = (byte)(initialR + pR);
         var calculatedG = (byte)(initialG + pG);
@@ -45,33 +45,39 @@ public class ColourController
     }
 
     // colours start from freq 0 and jumps in x increments -- currently at AudClient.cs int Increment
-    public static readonly Color[] Colours = new Color[]
+    public static readonly Color[] Colours =
     {
-        ColourController.NormaliseColour(Color.Black), // First entry ignored.
-        ColourController.NormaliseColour(Color.Red),
-        ColourController.NormaliseColour(Color.Purple),
-        ColourController.NormaliseColour(Color.Brown),
-        ColourController.NormaliseColour(Color.Crimson),
-        ColourController.NormaliseColour(Color.Navy),
-        ColourController.NormaliseColour(Color.DeepSkyBlue),
-        ColourController.NormaliseColour(Color.BlueViolet),
-        ColourController.NormaliseColour(Color.SkyBlue),
-        ColourController.NormaliseColour(Color.DeepSkyBlue),
-        ColourController.NormaliseColour(Color.HotPink),
-        ColourController.NormaliseColour(Color.DeepPink),
-        ColourController.NormaliseColour(Color.Fuchsia),
-        ColourController.NormaliseColour(Color.LightBlue),
-        ColourController.NormaliseColour(Color.LightBlue),
-        ColourController.NormaliseColour(Color.LightBlue),
-        ColourController.NormaliseColour(Color.LightBlue),
-        ColourController.NormaliseColour(Color.LightBlue),
-        ColourController.NormaliseColour(Color.White),
-        ColourController.NormaliseColour(Color.White),
-        ColourController.NormaliseColour(Color.White),
-        ColourController.NormaliseColour(Color.White),
-        ColourController.NormaliseColour(Color.White),
-        ColourController.NormaliseColour(Color.White)
+        NormaliseColour(Color.Black), // First entry ignored.
+        NormaliseColour(Color.Red),
+        NormaliseColour(Color.Purple),
+        NormaliseColour(Color.Brown),
+        NormaliseColour(Color.Crimson),
+        NormaliseColour(Color.Navy),
+        NormaliseColour(Color.DeepSkyBlue),
+        NormaliseColour(Color.BlueViolet),
+        NormaliseColour(Color.SkyBlue),
+        NormaliseColour(Color.DeepSkyBlue),
+        NormaliseColour(Color.HotPink),
+        NormaliseColour(Color.DeepPink),
+        NormaliseColour(Color.Fuchsia),
+        NormaliseColour(Color.LightBlue),
+        NormaliseColour(Color.LightBlue),
+        NormaliseColour(Color.LightBlue),
+        NormaliseColour(Color.LightBlue),
+        NormaliseColour(Color.LightBlue),
+        NormaliseColour(Color.White),
+        NormaliseColour(Color.White),
+        NormaliseColour(Color.White),
+        NormaliseColour(Color.White),
+        NormaliseColour(Color.White),
+        NormaliseColour(Color.White)
     };
+
+    public static Color[] GetColourArray()
+    {
+        // check elapsed time then give a different spectrum of colours?
+        return Colours;
+    }
 
     private static Color NormaliseColour(Color color)
     {
