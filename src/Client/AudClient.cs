@@ -20,50 +20,7 @@ public class AudClient
     private Task? _loop;
 
     private const int Increment = 100;
-
-    // colours start from freq 0 and jumps in x increments
-    // TODO change the colour palette based on the speed of the music
-    // TODO blend colours
-    /*
-     * Deep Blue: This color evokes feelings of calm and tranquility, making it a great choice for slow, mellow music.
-
-    Electric Purple: This color is bold and vibrant, making it a great choice for upbeat, high-energy music.
-
-    Forest Green: This color is earthy and grounding, making it a great choice for music with a more organic or natural feel.
-
-    Bright Yellow: This color is cheerful and uplifting, making it a great choice for happy, positive music.
-
-    Burgundy Red: This color is rich and intense, making it a great choice for dramatic or emotional music.
-
-    Neutral gray: This color is versatile and can work well with a variety of music styles and frequencies.
-     */
-    private readonly Color[] _colors = new Color[]
-    {
-        ColourConvert.NormaliseColour(Color.Black), // First entry ignored.
-        ColourConvert.NormaliseColour(Color.Red),
-        ColourConvert.NormaliseColour(Color.Purple),
-        ColourConvert.NormaliseColour(Color.Brown),
-        ColourConvert.NormaliseColour(Color.Crimson),
-        ColourConvert.NormaliseColour(Color.Navy),
-        ColourConvert.NormaliseColour(Color.DeepSkyBlue),
-        ColourConvert.NormaliseColour(Color.BlueViolet),
-        ColourConvert.NormaliseColour(Color.SkyBlue),
-        ColourConvert.NormaliseColour(Color.DeepSkyBlue),
-        ColourConvert.NormaliseColour(Color.HotPink),
-        ColourConvert.NormaliseColour(Color.DeepPink),
-        ColourConvert.NormaliseColour(Color.Fuchsia),
-        ColourConvert.NormaliseColour(Color.LightBlue),
-        ColourConvert.NormaliseColour(Color.LightBlue),
-        ColourConvert.NormaliseColour(Color.LightBlue),
-        ColourConvert.NormaliseColour(Color.LightBlue),
-        ColourConvert.NormaliseColour(Color.LightBlue),
-        ColourConvert.NormaliseColour(Color.White),
-        ColourConvert.NormaliseColour(Color.White),
-        ColourConvert.NormaliseColour(Color.White),
-        ColourConvert.NormaliseColour(Color.White),
-        ColourConvert.NormaliseColour(Color.White),
-        ColourConvert.NormaliseColour(Color.White)
-    };
+    private Color _prevColor;
 
 
     public AudClient(double threshold = 75, string ip = "192.168.1.11", int port = 5555, int stripSize = 150,
@@ -80,28 +37,25 @@ public class AudClient
     public async Task Init()
     {
         _loop = UpdateLoop();
-        using (var capture = new WasapiLoopbackCapture())
+        using var capture = new WasapiLoopbackCapture();
+        Console.WriteLine("INIT!!");
+        capture.WaveFormat = new WaveFormat(SampleRate, 16, 1);
+        _captureWf = capture.WaveFormat;
+        // Set up an event handler to receive the audio data
+        capture.DataAvailable += OnDataAvailable!;
 
-        {
-            Console.WriteLine("INIT!!");
-            capture.WaveFormat = new WaveFormat(SampleRate, 16, 1);
-            _captureWf = capture.WaveFormat;
-            // Set up an event handler to receive the audio data
-            capture.DataAvailable += OnDataAvailable!;
+        // Start capturing audio
+        capture.StartRecording();
 
-            // Start capturing audio
-            capture.StartRecording();
+        // Wait for the user to stop capturing audio
+        Console.WriteLine("Press any key to reconnect to audio");
+        Console.ReadKey();
 
-            // Wait for the user to stop capturing audio
-            Console.WriteLine("Press any key to reconnect to audio");
-            Console.ReadKey();
-
-            capture.DataAvailable -= OnDataAvailable!;
+        capture.DataAvailable -= OnDataAvailable!;
 #pragma warning disable CS4014
-            Init();
+        Init();
 #pragma warning restore CS4014
-            await _loop!;
-        }
+        await _loop!;
     }
 
     private async Task? UpdateLoop()
@@ -199,30 +153,30 @@ public class AudClient
             byte colourB = 0;
             byte colourG = 0;
             // Widen the frequency band to reduce the flickering? 200 - 300 instead of 100 jumps?
+            
             // assign out of range values
-
             colourR = calc;
             colourG = calc;
             colourB = calc;
-            for (var i = 0; i < _colors.Length; i++)
+            var colours = ColourController.Colours;
+            for (var i = 0; i < colours.Length; i++)
             {
                 var freqRange = i * Increment;
-                /*Console.WriteLine(freqRange > frequency);
-                Console.WriteLine(freqRange-Increment < frequency);*/
-
                 if (freqRange <= frequency || freqRange - Increment >= frequency) continue;
 
                 if (Program.Debug)
-                    Console.WriteLine(_colors[i]);
-                colourR = (byte)(_colors[i].R * calc);
-                colourB = (byte)(_colors[i].G * calc);
-                colourG = (byte)(_colors[i].B * calc);
-                //Console.WriteLine($"freq {frequency}  Selected:{_colors[i]}");
+                    Console.WriteLine(colours[i]);
+                colourR = (byte)(colours[i].R * calc);
+                colourB = (byte)(colours[i].G * calc);
+                colourG = (byte)(colours[i].B * calc);
             }
 
             var colour = Color.FromArgb(colourR, colourB, colourG);
+            // blend
+            var blendedColour = ColourController.Blend(colour, _prevColor);
+            _prevColor = colour;
             //Console.WriteLine($"Colour:{colour}");
-            _strip.IncrementStrip(colour);
+            _strip.IncrementStrip(blendedColour);
 
             var networkClient = new NetClient(_ip, _port);
             networkClient.SendData(_strip.GetByteArray());
