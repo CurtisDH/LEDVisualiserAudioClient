@@ -2,10 +2,9 @@ using System.Drawing;
 
 namespace AudioClient.Utility;
 
-public class ColourController
+public static class ColourController
 {
     // TODO change the colour palette based on the speed of the music
-    // TODO blend colours
     /*
      * Deep Blue: This color evokes feelings of calm and tranquility, making it a great choice for slow, mellow music.
 
@@ -20,6 +19,8 @@ public class ColourController
     Neutral gray: This color is versatile and can work well with a variety of music styles and frequencies.
      */
 
+    
+    
     public static Color Blend(Color initial, Color previous)
     {
         // half all the values currently in the initial and the previous, and then add them together.
@@ -41,7 +42,7 @@ public class ColourController
         var calculatedB = (byte)(initialB + pB);
 
 
-        return Color.FromArgb(calculatedR, calculatedB, calculatedG);
+        return Color.FromArgb(calculatedR, calculatedG, calculatedB);
     }
 
     // colours start from freq 0 and jumps in x increments -- currently at AudClient.cs int Increment
@@ -57,9 +58,9 @@ public class ColourController
         NormaliseColour(Color.BlueViolet),
         NormaliseColour(Color.SkyBlue),
         NormaliseColour(Color.DeepSkyBlue),
-        NormaliseColour(Color.HotPink),
-        NormaliseColour(Color.DeepPink),
-        NormaliseColour(Color.Fuchsia),
+        NormaliseColour(Color.DeepSkyBlue),
+        NormaliseColour(Color.DeepSkyBlue),
+        NormaliseColour(Color.DeepSkyBlue),
         NormaliseColour(Color.LightBlue),
         NormaliseColour(Color.LightBlue),
         NormaliseColour(Color.LightBlue),
