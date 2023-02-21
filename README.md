@@ -20,7 +20,7 @@ The following commands can be used when running via command prompt to change the
 -port&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(integer type expected) The target port of ... as above.  
 -strip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(integer type expected) This is the size of your LED strip    
 -speed&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(integer type expected) This is the update rate of LED strip in milliseconds       
-
+-split&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(true/false string response expected) Splits the visualiser down the middle into two visual streams  
 Example using command prompt to run the exe:  
 AudioClient.exe -port 5555 -ip 192.168.1.11 -strip 150 -speed 11 -threshold 10
 <br />

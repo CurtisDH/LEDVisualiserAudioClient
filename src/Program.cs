@@ -5,6 +5,7 @@ namespace AudioClient
 {
     internal static class Program
     {
+        public static bool Split = false;
         public static bool Debug = false;
 
         private static async Task Main(string[] args)
@@ -17,7 +18,7 @@ namespace AudioClient
             int speed = 15;
 
             // TODO make this reflect the change in the switch statement below
-            string[] runtimeArgs = new[] { "-threshold", "-ip", "-port", "-strip", "-speed" };
+            string[] runtimeArgs = new[] { "-threshold", "-ip", "-port", "-strip", "-speed", "-split" };
             Console.WriteLine("Available runtime args:");
             foreach (var arg in runtimeArgs)
             {
@@ -56,7 +57,10 @@ namespace AudioClient
                         case "-speed":
                             int.TryParse(args[i + 1], out speed);
                             Console.WriteLine($"Update speed (in ms) set to:{speed}");
-
+                            break;
+                        case "-split":
+                            bool.TryParse(args[i + 1], out Split);
+                            Console.WriteLine($"Split set to {Split}");
                             break;
                     }
                 }

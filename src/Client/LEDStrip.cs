@@ -6,35 +6,54 @@ namespace AudioClient.Client;
 public class LedStrip
 {
     public Color[] Strip;
+    private int mid;
 
     public LedStrip(int stripLength)
     {
         Strip = new Color[stripLength];
+        mid = (stripLength / 2) - 1;
     }
 
     public void IncrementStrip(Color color)
     {
-        Strip[0] = color;
-        Stopwatch sw = new Stopwatch();
-        sw.Start();
-        for (int i = Strip.Length - 2; i >= 0; i--)
+        if (Program.Split)
         {
-            Strip[i + 1] = Strip[i];
+            Strip[mid] = color;
+        }
+        else
+        {
+            Strip[0] = color;
         }
 
-        sw.Stop();
-        if (Program.Debug)
-            Console.WriteLine(sw.Elapsed);
+
+        IncrementStrip();
+
     }
 
     public void IncrementStrip()
     {
         Stopwatch sw = new Stopwatch();
         sw.Start();
-        for (int i = Strip.Length - 2; i >= 0; i--)
+        if (Program.Split)
         {
-            Strip[i + 1] = Strip[i];
+            for (int i = Strip.Length - 2; i >= (mid); i--)
+            {
+                Strip[i + 1] = Strip[i];
+            }
+            for (int i = 0; i <= mid; i++)
+            {
+                if (i > 0)
+                    Strip[i - 1] = Strip[i];
+            }
         }
+        else
+        {
+            for (int i = Strip.Length - 2; i >= 0; i--)
+            {
+                Strip[i + 1] = Strip[i];
+            }
+        }
+
 
         sw.Stop();
         if (Program.Debug)
