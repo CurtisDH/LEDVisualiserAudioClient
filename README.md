@@ -38,7 +38,7 @@ In order to process the byte array and turn it into meaningful data you need to 
 Magnitude threshold: Lower values will respond to quieter sounds, higher values will ignore quieter sounds. Keep in mind the magnitude value is captured from the highest value in the FFT set, play around with this value to see what works best for you    
 <br />    
 On the same note, colour spectrum is based on the frequency, and the brightness is controlled by the volume (magnitude).  
-(WIP) Smooth colour blending and alternating between different sets of colours.
+Smooth colour blending (Done) and (WIP) alternating between different sets of colours after x period.
 <br />
 Changing default device during playback requires a reconnect. The currently implemented solution is to interact with the terminal by pressing any key which will trigger a reset, ultimately targeting the default playback device.
 
