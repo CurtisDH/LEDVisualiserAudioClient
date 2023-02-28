@@ -1,7 +1,10 @@
 # AudioClient
 Utilises NAudio (V2.1.0) WSAPI to capture the default windows playback device, runs it through [FFT](https://en.wikipedia.org/wiki/Fast_Fourier_transform) 
 and turns it into a byte array containing RGB values for the entire strip **(see byte array order below)** which are influenced by the frequency value, brightness is controlled by the magnitude (which is like volume) the entire led strip which has been processed on the client is then sent to the target ip address and needs to be processed  
-
+<br />
+<br />
+You can view a demonstration on YouTube [here](https://youtu.be/EE9si3eyNik):  
+<br />
 
 ### Setup
 
