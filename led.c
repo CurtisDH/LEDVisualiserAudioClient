@@ -3,10 +3,10 @@
 
 
 
-// and the creation of the byte array that we can populate
 
-// are we going to serialize it in some sort of fashion? do we create a union?
-
+// TODO might be better to create like an overall config that we just include for these
+// constant variables
+#define LED_PARAMS 4
 
 void serializeLedData(const Led *LedArray, int ledArraySize, uint8_t *byteArr)
 {
@@ -27,10 +27,10 @@ void serializeLedData(const Led *LedArray, int ledArraySize, uint8_t *byteArr)
     // the LED struct parameters r,g,b,a
     for (int i = 0; i < ledArraySize; ++i)
     {
-        byteArr[i * 4] = LedArray[i].r;
-        byteArr[i * 4 + 1] = LedArray[i].g;
-        byteArr[i * 4 + 2] = LedArray[i].b;
-        byteArr[i * 4 + 3] = LedArray[i].a;
+        byteArr[i * LED_PARAMS] = LedArray[i].r;
+        byteArr[i * LED_PARAMS + 1] = LedArray[i].g;
+        byteArr[i * LED_PARAMS + 2] = LedArray[i].b;
+        byteArr[i * LED_PARAMS + 3] = LedArray[i].a;
     }
 
 }
@@ -46,4 +46,26 @@ void UpdateStrip(Led *LedArray, int stripSize)
     // this way we will get the update effect starting from the opposite side of the strip
     // We do need to allow for a splitting function, so might be worth taking into account when
     // writing the initial update
+}
+
+void ColourBlend()
+{
+
+}
+
+void AddLed(Led LedToAdd, Led *LedArray, int stripSize)
+{
+    UpdateStrip(LedArray, stripSize);
+    LedArray[0] = LedToAdd;
+    // push this data out? or do another update strip? -- I think another update is overkill
+}
+
+void sendData(Led *LedArray, int stripSize)
+{
+    // this will basically just send the update packet so lets prepare the data to send
+    uint8_t *byteArray = malloc(stripSize * LED_PARAMS);
+    serializeLedData(LedArray, stripSize, byteArray);
+    // should now be written into the byte array so all we need to do is send it, and then free memory
+    // todo sockets and other network stuff
+    free(byteArray);
 }
