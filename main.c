@@ -11,7 +11,7 @@
 #define BUFFER_SIZE 2048
 #define SAMPLE_RESOLUTION 2048  // Number of samples for FFT (must be a power of 2)
 #define HOP_SIZE 128  // Number of samples to hop between segments
-
+#define LED_STRIP_SIZE 150 // Num of LED in the physical array
 
 
 // TODO 
@@ -29,9 +29,6 @@
 // it'll work on the majority of linux devices (think this would apply to android too?)
 // bluetooth?
 // live latency adjustment, might need intermediary hardware to successfully measure this
-
-
-void SendData();
 
 int main()
 {
@@ -63,20 +60,17 @@ int main()
     int buffer_index = 0;
     printf("Starting Real-time audio analysis on device: %s\n", outputDevices[input].name);
 
-    AnalyseAudio(record_handle, &error, buffer, buffer_index, BUFFER_SIZE, SAMPLE_RESOLUTION, SAMPLE_RATE, HOP_SIZE);
+    // This is the main loop of the program, sending data will be done through this method
+    // same with all the colour related actions. 
+    // TODO should this be abstracted or should it just be in the main method?? 
+    AnalyseAudio(record_handle, &error, buffer, buffer_index, BUFFER_SIZE, SAMPLE_RESOLUTION, SAMPLE_RATE,
+                 HOP_SIZE, LED_STRIP_SIZE);
 
-    SendData();
     // Clean up and close the streams
     pa_simple_free(record_handle);
 
     return 0;
 }
 
-void SendData()
-{
-    // TODO
-    // this will be the implementation which sends our byte array with all the data to the client
-
-}
 
 

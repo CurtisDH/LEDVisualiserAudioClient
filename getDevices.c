@@ -6,16 +6,11 @@
 #include <string.h>
 #include <pulse/pulseaudio.h>
 #include <pulse/simple.h>
+#include "getDevices.h"
 
 
 // Field list is here: http://0pointer.de/lennart/projects/pulseaudio/doxygen/structpa__sink__info.html
-typedef struct pa_devicelist
-{
-    uint8_t initialized;
-    char name[512];
-    uint32_t index;
-    char description[256];
-} pa_devicelist_t;
+
 
 void pa_state_cb(pa_context *c, void *userdata);
 
