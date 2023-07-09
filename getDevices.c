@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <pulse/pulseaudio.h>
+#include <pulse/simple.h>
+
 
 // Field list is here: http://0pointer.de/lennart/projects/pulseaudio/doxygen/structpa__sink__info.html
 typedef struct pa_devicelist
@@ -245,4 +247,47 @@ int getDeviceList(pa_devicelist_t *pa_input_devicelist, pa_devicelist_t *pa_outp
         }
     }
     return 0;
+}
+
+void SetupAudioCapture(const pa_devicelist_t *outputDevices, int input, pa_simple **record_handle, int *error,
+                       int SAMPLE_RATE, int CHANNELS)
+{
+    (*record_handle) = NULL;
+    pa_sample_spec record_spec;
+    // resolve issue regarding discarding qualifiers
+    char record_device[512];
+    strcpy(record_device, outputDevices[input].name);
+    strcat(record_device, ".monitor");
+    // Set up the sample specifications for recording
+    record_spec.format = PA_SAMPLE_S16LE;
+    record_spec.rate = SAMPLE_RATE;
+    record_spec.channels = CHANNELS;
+
+    // Create a new recording stream
+    (*record_handle) = pa_simple_new(NULL, "Record", PA_STREAM_RECORD, record_device, "Record", &record_spec, NULL,
+                                     NULL,
+                                     error);
+}
+
+int audioDeviceSelection(const uint8_t size, const pa_devicelist_t *outputDevices)
+{
+    int input = -1;
+    // wait for a valid device to be selected
+    while (input < 0 || input > size)
+    {
+        printf("Select from the following devices:\n");
+        for (int i = 0; i < size; ++i)
+        {
+            if (strlen(outputDevices[i].name) == 0)
+            {
+                // empty entry.
+                break;
+            }
+            printf("=======[ Output Device #%d ]=======\n", i);
+            printf("Description: %s\n", outputDevices[i].description);
+            printf("Name: %s\n", outputDevices[i].name);
+        }
+        scanf("%d", &input);
+    }
+    return input;
 }

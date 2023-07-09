@@ -15,5 +15,9 @@ typedef struct pa_devicelist
 
 int getDeviceList(pa_devicelist_t *pa_input_devicelist, pa_devicelist_t *pa_output_devicelist);
 
+void SetupAudioCapture(const pa_devicelist_t *outputDevices, int input, pa_simple **record_handle, int *error,
+                       int SAMPLE_RATE, int CHANNELS);
+
+int audioDeviceSelection(const uint8_t size, const pa_devicelist_t *outputDevices);
 
 #endif //CAUDIOCLIENT_GETDEVICES_H
