@@ -8,6 +8,9 @@
 
 #include "led.h"
 
+// TODO, again same with led.c we should probs create a generic const c/h or smth
+#define FILTER_MAGNITUDE 35000
+
 void fft(complex double *x, int n)
 {
     if (n <= 1)
@@ -41,6 +44,8 @@ AnalyseAudio(pa_simple *record_handle, int *error, int16_t *buffer, int buffer_i
 {// Continuously capture and analyze audio
     // Create the LED array all values are initialised to 0 from malloc.
     Led *LedArray = malloc(LED_STRIP_SIZE);
+    // basically we need to determine the pattern and the colour based on the frequency that comes up.
+
 
     while (1)
     {
@@ -79,7 +84,7 @@ AnalyseAudio(pa_simple *record_handle, int *error, int16_t *buffer, int buffer_i
                 frequencies[i] = (double) SAMPLE_RATE * i / SAMPLE_RES;
                 magnitudes[i] = cabs(complex_buffer[i]);
 
-                if (magnitudes[i] > max_magnitude)
+                if (magnitudes[i] > max_magnitude && frequencies[i] < FILTER_MAGNITUDE)
                 {
                     max_magnitude = magnitudes[i];
                     max_magnitude_index = i;

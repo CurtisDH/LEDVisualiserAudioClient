@@ -8,6 +8,10 @@
 // constant variables
 #define LED_PARAMS 4
 
+
+// TODO we need to figure out how we turn off the leds, maybe we literally just make it flow 
+//  through when mag is 0 but we probs want to stop sending data when all the leds are off 
+//  something to think about
 void serializeLedData(const Led *LedArray, int ledArraySize, uint8_t *byteArr)
 {
     if (LedArray == NULL)
