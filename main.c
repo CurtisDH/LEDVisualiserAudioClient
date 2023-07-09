@@ -1,22 +1,54 @@
 #include <stdio.h>
 #include <pulse/simple.h>
 #include <pulse/error.h>
-#include <math.h>
+#include <string.h>
 #include <complex.h>
 
 #include "fft.h"
+#include "getDevices.h"
+
 
 #define SAMPLE_RATE 44100
 #define CHANNELS 1
 #define BUFFER_SIZE 2048
 #define N 2048  // Number of samples for FFT (must be a power of 2)
+#define HOP_SIZE 128  // Number of samples to hop between segments
 
 
 int main()
 {
+
+    // This is where we'll store the input device list
+    pa_devicelist_t inputDevices[16];
+
+    // This is where we'll store the output device list
+    pa_devicelist_t outputDevices[16];
+
+    getDeviceList(inputDevices, outputDevices);
+
+    int input = -1;
+    // wait for a valid device to be selected
+    while (input < 0 || input > 16)
+    {
+        printf("Select from the following devices:\n");
+        for (int i = 0; i < 16; ++i)
+        {
+            if (strlen(outputDevices[i].name) == 0)
+            {
+                // empty entry.
+                break;
+            }
+            printf("=======[ Output Device #%d ]=======\n", i);
+            printf("Description: %s\n", outputDevices[i].description);
+            printf("Name: %s\n", outputDevices[i].name);
+        }
+        scanf("%d", &input);
+    }
+
+
     pa_simple *record_handle = NULL;
     pa_sample_spec record_spec;
-    const char *record_device = "bluez_sink.EC_81_93_58_81_91.a2dp_sink.monitor";
+    char *record_device = strcat(outputDevices[input].name, ".monitor");
     int error;
 
     // Set up the sample specifications for recording
@@ -37,7 +69,7 @@ int main()
     int16_t buffer[BUFFER_SIZE];
     int buffer_index = 0;
 
-    printf("Real-time audio analysis from Bluetooth A2DP sink device...\n");
+    printf("Real-time audio analysis from %s...\n", outputDevices[input].name);
 
     // Continuously capture and analyze audio
     while (1)
@@ -52,8 +84,8 @@ int main()
 
         buffer_index += (BUFFER_SIZE - buffer_index);
 
-        // If the buffer is full, perform FFT and analysis
-        if (buffer_index >= BUFFER_SIZE)
+        // If enough samples are available, perform FFT and analysis
+        while (buffer_index >= N)
         {
             // Convert captured audio buffer to complex double type
             complex double complex_buffer[N];
@@ -85,9 +117,9 @@ int main()
 
             printf("Maximum magnitude: %f at frequency: %f Hz\n", max_magnitude, frequencies[max_magnitude_index]);
 
-            // Shift buffer contents to the beginning
-            memmove(buffer, buffer + N, (BUFFER_SIZE - N) * sizeof(int16_t));
-            buffer_index -= N;
+            // Shift buffer contents by hop size
+            memmove(buffer, buffer + HOP_SIZE, (BUFFER_SIZE - HOP_SIZE) * sizeof(int16_t));
+            buffer_index -= HOP_SIZE;
         }
     }
 
@@ -96,5 +128,3 @@ int main()
 
     return 0;
 }
-
-
