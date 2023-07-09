@@ -2,16 +2,11 @@
 #include <pulse/simple.h>
 #include <pulse/error.h>
 
-#include "FFT Module/fft.h"
-#include "FetchDevices Module/getDevices.h"
+#include "FFT/fft.h"
+#include "FetchDevices/getDevices.h"
+#include "Configs/constants.h"
 
 
-#define SAMPLE_RATE 44100
-#define CHANNELS 1
-#define BUFFER_SIZE 2048
-#define SAMPLE_RESOLUTION 2048  // Number of samples for FFT (must be a power of 2)
-#define HOP_SIZE 128  // Number of samples to hop between segments
-#define LED_STRIP_SIZE 150 // Num of LED in the physical array
 
 
 // TODO 
@@ -29,6 +24,8 @@
 // it'll work on the majority of linux devices (think this would apply to android too?)
 // bluetooth?
 // live latency adjustment, might need intermediary hardware to successfully measure this
+// create a json parser so we don't have to hard code the led variables
+
 
 int main()
 {
@@ -63,8 +60,7 @@ int main()
     // This is the main loop of the program, sending data will be done through this method
     // same with all the colour related actions. 
     // TODO should this be abstracted or should it just be in the main method?? 
-    AnalyseAudio(record_handle, &error, buffer, buffer_index, BUFFER_SIZE, SAMPLE_RESOLUTION, SAMPLE_RATE,
-                 HOP_SIZE, LED_STRIP_SIZE);
+    AnalyseAudio(record_handle, &error, buffer, buffer_index);
 
     // Clean up and close the streams
     pa_simple_free(record_handle);

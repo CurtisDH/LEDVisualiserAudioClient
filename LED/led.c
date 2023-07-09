@@ -1,12 +1,12 @@
 #include <malloc.h>
 #include "led.h"
-
+#include "../Network/network.h"
+#include "../Configs/constants.h"
 
 
 
 // TODO might be better to create like an overall config that we just include for these
 // constant variables
-#define LED_PARAMS 4
 
 
 // TODO we need to figure out how we turn off the leds, maybe we literally just make it flow 
@@ -23,7 +23,7 @@ void serializeLedData(const Led *LedArray, int ledArraySize, uint8_t *byteArr)
         // could cause some issues for us if we lose track down the line
         fprintf(stderr, "Warning: %s\n",
                 "Byte array was null, memory has been allocated, MAKE SURE THIS IS FREED LATER TO AVOID LEAKS");
-        byteArr = malloc(ledArraySize * 4);
+        byteArr = malloc((ledArraySize * LED_PARAMS));
     }
 
     // byte array size shouldn't need to be queried from the other classes
@@ -34,7 +34,6 @@ void serializeLedData(const Led *LedArray, int ledArraySize, uint8_t *byteArr)
         byteArr[i * LED_PARAMS] = LedArray[i].r;
         byteArr[i * LED_PARAMS + 1] = LedArray[i].g;
         byteArr[i * LED_PARAMS + 2] = LedArray[i].b;
-        byteArr[i * LED_PARAMS + 3] = LedArray[i].a;
     }
 
 }
@@ -42,7 +41,7 @@ void serializeLedData(const Led *LedArray, int ledArraySize, uint8_t *byteArr)
 void UpdateStrip(Led *LedArray, int stripSize)
 {
     // todo call in a second thread if required
-    for (int i = stripSize; i > 0; --i)
+    for (int i = stripSize; i >= 0; --i)
     {
         LedArray[i + 1] = LedArray[i];
     }
@@ -57,19 +56,15 @@ void ColourBlend()
 
 }
 
-void AddLed(Led LedToAdd, Led *LedArray, int stripSize)
+void AddLed(int r, int g, int b, int a, Led *LedArray, int stripSize)
 {
     UpdateStrip(LedArray, stripSize);
-    LedArray[0] = LedToAdd;
+
+    LedArray[0].r = r;
+    LedArray[0].g = g;
+    LedArray[0].b = b;
+
     // push this data out? or do another update strip? -- I think another update is overkill
+    sendData(LedArray, stripSize);
 }
 
-void sendData(Led *LedArray, int stripSize)
-{
-    // this will basically just send the update packet so lets prepare the data to send
-    uint8_t *byteArray = malloc(stripSize * LED_PARAMS);
-    serializeLedData(LedArray, stripSize, byteArray);
-    // should now be written into the byte array so all we need to do is send it, and then free memory
-    // todo sockets and other network stuff
-    free(byteArray);
-}
