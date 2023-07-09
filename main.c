@@ -2,8 +2,8 @@
 #include <pulse/simple.h>
 #include <pulse/error.h>
 
-#include "fft.h"
-#include "getDevices.h"
+#include "FFT Module/fft.h"
+#include "FetchDevices Module/getDevices.h"
 
 
 #define SAMPLE_RATE 44100
