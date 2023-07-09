@@ -11,8 +11,8 @@
 
 // TODO 
 // create a byte array to simulate each led -- DONE READY TO POPULATE WITH DATA
-// we still need to filter out the random noise jumps to over 40k freq -- WIP
-// we want to take the average magnitude so that its not blindingly bright all the time
+// we still need to filter out the random noise jumps to over 40k freq -- DONE
+// we want to take the average magnitude so that its not blindingly bright all the time 
 // this will also allow for songs to have a high visualisation definition if the start volume is low
 // Also still need to implement functionality that we had in the C# one,
 // colour blending,

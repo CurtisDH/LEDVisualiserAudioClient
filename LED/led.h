@@ -3,6 +3,7 @@
 //
 #include <stdio.h>
 #include <stdint.h>
+#include "colour.h"
 
 
 #ifndef CAUDIOCLIENT_LED_H
@@ -16,7 +17,7 @@ typedef struct
 
 } Led;
 
-void AddLed(int r, int g, int b, int a, Led *LedArray, int stripSize);
+void AddLed(Colour *colour, Led *LedArray, int stripSize);
 
 void serializeLedData(const Led *LedArray, int ledArraySize, uint8_t *byteArr);
 

@@ -6,10 +6,11 @@
 #define CHANNELS 1 // fft gets processed differently if its anything other than mono // TODO look into this
 #define BUFFER_SIZE 2048 // audio buffer size 
 #define SAMPLE_RESOLUTION 2048  // Number of samples for FFT (must be a power of 2)
-#define HOP_SIZE 128  // Number of samples to hop between segments
+#define HOP_SIZE 512  // Number of samples to hop between segments
 #define LED_STRIP_SIZE 150 // Num of LED in the physical array
 
 #define IP_ADDRESS "192.168.1.11"
 #define PORT 5555
+#define DELAY_IN_MS 10
 
 #endif //CAUDIOCLIENT_CONSTANTS_H

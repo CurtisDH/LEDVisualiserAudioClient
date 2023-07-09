@@ -5,9 +5,11 @@
 #include <pulse/simple.h>
 #include <pulse/error.h>
 #include <malloc.h>
+#include <unistd.h>
 
 #include "../LED/led.h"
 #include "../Configs/constants.h"
+#include "../LED/colour.h"
 
 void fft(complex double *x, int n)
 {
@@ -113,12 +115,21 @@ void AnalyseAudio(pa_simple *record_handle, int *error, int16_t *buffer, int buf
 
             printf("Maximum magnitude: %f at frequency: %f Hz\n", max_magnitude, frequencies[max_magnitude_index]);
 
-            AddLed(10, 0, 0, 50, LedArray, LED_STRIP_SIZE);
+            Colour *colour = malloc(sizeof(Colour));
+            colour->r = 0;
+            colour->g = 0;
+            colour->b = 0;
+            DetermineColour(colour, frequencies[max_magnitude_index], max_magnitude);
+            AddLed(colour, LedArray, LED_STRIP_SIZE);
+            free(colour);
 
 // Shift buffer contents by hop size
             memmove(buffer, buffer
                             + HOP_SIZE, (BUFFER_SIZE - HOP_SIZE) * sizeof(int16_t));
             buffer_index -= HOP_SIZE;
+            usleep(DELAY_IN_MS * 1000);
         }
     }
+    // Currently no way to exit, but once we do i don't want to have forgotten later
+    free(LedArray);
 }

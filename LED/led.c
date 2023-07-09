@@ -2,6 +2,7 @@
 #include "led.h"
 #include "../Network/network.h"
 #include "../Configs/constants.h"
+#include "colour.h"
 
 
 
@@ -56,13 +57,13 @@ void ColourBlend()
 
 }
 
-void AddLed(int r, int g, int b, int a, Led *LedArray, int stripSize)
+void AddLed(Colour *colour, Led *LedArray, int stripSize)
 {
     UpdateStrip(LedArray, stripSize);
 
-    LedArray[0].r = r;
-    LedArray[0].g = g;
-    LedArray[0].b = b;
+    LedArray[0].r = colour->r;
+    LedArray[0].g = colour->g;
+    LedArray[0].b = colour->b;
 
     // push this data out? or do another update strip? -- I think another update is overkill
     sendData(LedArray, stripSize);
