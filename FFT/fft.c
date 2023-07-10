@@ -75,7 +75,7 @@ void AnalyseAudio(pa_simple *record_handle, int *error, int16_t *buffer, int buf
         fprintf(stderr, "Failed to create the thread\n");
         return;
     }
-
+    Colour prevColour = {0, 0, 0};
     while (1)
     {
 // TODO, allow for the user to interrupt this so they can change device without restart
@@ -152,12 +152,24 @@ void AnalyseAudio(pa_simple *record_handle, int *error, int16_t *buffer, int buf
                 start = end - AVERAGE_WINDOW_SIZE;
             }
             double averageMagnitude = calculateAverageMagnitude(magnitudes, start, end);
+            printf("avg mag %f", averageMagnitude);
+            // couldn't see a difference with this
+//            if (max_magnitude < averageMagnitude)
+//            {
+//                // Shift buffer contents by hop size
+//                memmove(buffer, buffer
+//                                + HOP_SIZE, (BUFFER_SIZE - HOP_SIZE) * sizeof(int16_t));
+//                buffer_index -= HOP_SIZE;
+//                continue;
+//            }
             Colour *colour = malloc(sizeof(Colour));
             colour->r = 0;
             colour->g = 0;
             colour->b = 0;
-            DetermineColour(colour, frequencies[max_magnitude_index], max_magnitude);
-            AddLed(colour, LedArray, LED_STRIP_SIZE, averageMagnitude);
+            DetermineColour(colour, frequencies[max_magnitude_index]);
+            Colour blended = ColourBlend(*colour, prevColour);
+            prevColour = blended;
+            AddLed(blended, LedArray, averageMagnitude);
             free(colour);
 
 // Shift buffer contents by hop size

@@ -102,7 +102,7 @@ Colour Colours[] = {
 
 };
 
-void DetermineColour(Colour *colour, float freq, float mag)
+void DetermineColour(Colour *colour, float freq)
 {
     int numColours = sizeof(Colours) / sizeof(Colour);
 

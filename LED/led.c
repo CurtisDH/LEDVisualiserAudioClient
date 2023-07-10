@@ -3,6 +3,8 @@
 #include "../Network/network.h"
 #include "../Configs/constants.h"
 #include "colour.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 
 
@@ -55,18 +57,38 @@ void UpdateStrip(Led *LedArray, int stripSize)
 
 }
 
-void ColourBlend()
+Colour ColourBlend(Colour initial, Colour previous)
 {
+    float weight = 0.5f;
+    float initialR = (float) initial.r * weight;
+    float initialG = (float) initial.g * weight;
+    float initialB = (float) initial.b * weight;
 
+    float prevR = (float) previous.r * (1 - weight);
+    float prevG = (float) previous.g * (1 - weight);
+    float prevB = (float) previous.b * (1 - weight);
+
+
+    uint8_t calcR = (uint8_t) (initialR + prevR);
+    uint8_t calcG = (uint8_t) (initialG + prevG);
+    uint8_t calcB = (uint8_t) (initialB + prevB);
+
+    printf("Blended Color: R=%u, G=%u, B=%u\n", calcR, calcG, calcB);
+
+    Colour c = {calcR, calcG, calcB};
+    return c;
 }
 
-void AddLed(Colour *colour, Led *LedArray, int stripSize, double averageMagnitude)
+
+void AddLed(Colour colour, Led *LedArray, double averageMagnitude)
 {
-    int brightness = (int) (averageMagnitude * MAX_BRIGHTNESS);
-    printf("brightness: %u avg mag%f:", brightness, averageMagnitude);
-    LedArray[0].r = (colour->r * brightness) / MAX_BRIGHTNESS;
-    LedArray[0].g = (colour->g * brightness) / MAX_BRIGHTNESS;
-    LedArray[0].b = (colour->b * brightness) / MAX_BRIGHTNESS;
+//    int brightness = (int) (averageMagnitude * MAX_BRIGHTNESS);
+//    printf("brightness: %u avg mag %f:", brightness, averageMagnitude);
+    LedArray[0].r = ((colour.r * averageMagnitude) / (255 - MAX_BRIGHTNESS));
+    LedArray[0].g = ((colour.g * averageMagnitude) / (255 - MAX_BRIGHTNESS));
+    LedArray[0].b = ((colour.b * averageMagnitude) / (255 - MAX_BRIGHTNESS));
+
+    printf("r:%d,g:%d,b:%d", LedArray[0].r, LedArray[0].g, LedArray[0].b);
 
 }
 

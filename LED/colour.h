@@ -10,6 +10,6 @@ typedef struct
     unsigned char b;
 } Colour;
 
-void DetermineColour(Colour *colour, float freq, float mag);
+void DetermineColour(Colour *colour, float freq);
 
 #endif //CAUDIOCLIENT_COLOUR_H
