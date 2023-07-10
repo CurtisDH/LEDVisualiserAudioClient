@@ -10,12 +10,12 @@
 
 
 // TODO 
-// create a byte array to simulate each led -- DONE READY TO POPULATE WITH DATA
+// create a byte array to simulate each led -- DONE
 // we still need to filter out the random noise jumps to over 40k freq -- DONE
-// we want to take the average magnitude so that its not blindingly bright all the time 
+// we want to take the average magnitude so that its not blindingly bright all the time -- DONE
 // this will also allow for songs to have a high visualisation definition if the start volume is low
 // Also still need to implement functionality that we had in the C# one,
-// colour blending,
+// colour blending, -- DONE
 // splitting (can make this even better tho)
 // json file for the colours so we can dynamically update them?
 // colour rotation cycles
@@ -25,6 +25,15 @@
 // bluetooth?
 // live latency adjustment, might need intermediary hardware to successfully measure this
 // create a json parser so we don't have to hard code the led variables
+
+// todo even more :(
+// tempo finder -- adjust the update based on the detected song tempo 
+// beat locator -- that way we can have a very visually consistent beat for the song even if ..
+//       the magnitude is flushed covered by other aspects of the song
+
+// some notes seem to stretch really far, not necessarily terrible but would like sharper visual definition
+//examples of this is like piano notes, or guitar picking, so maybe we just need to
+// display groups of frequency at a time if they are recurring 
 
 
 int main()
