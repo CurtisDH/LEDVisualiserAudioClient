@@ -17,7 +17,7 @@ typedef struct
 
 } Led;
 
-void AddLed(Colour *colour, Led *LedArray, int stripSize);
+void AddLed(Colour *colour, Led *LedArray, int stripSize, double averageMagnitude);
 
 void serializeLedData(const Led *LedArray, int ledArraySize, uint8_t *byteArr);
 

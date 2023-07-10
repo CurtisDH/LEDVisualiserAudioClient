@@ -38,6 +38,17 @@ void fft(complex double *x, int n)
     }
 }
 
+double calculateAverageMagnitude(const double *magnitudes, int start, int end)
+{
+    double sum = 0.0;
+    for (int i = 0; i < end; ++i)
+    {
+        sum += magnitudes[i];
+    }
+    return sum / (end - start);
+}
+
+
 void AnalyseAudio(pa_simple *record_handle, int *error, int16_t *buffer, int buffer_index)
 {// Continuously capture and analyze audio
 // Create the LED array all values are initialised to 0 from malloc.
@@ -115,19 +126,34 @@ void AnalyseAudio(pa_simple *record_handle, int *error, int16_t *buffer, int buf
 
             printf("Maximum magnitude: %f at frequency: %f Hz\n", max_magnitude, frequencies[max_magnitude_index]);
 
+            // Calculate the average magnitude
+            int start = max_magnitude_index - AVERAGE_WINDOW_SIZE / 2;
+            int end = start + AVERAGE_WINDOW_SIZE;
+
+            if (start < 0)
+            {
+                start = 0;
+                end = AVERAGE_WINDOW_SIZE;
+            }
+            if (end > SAMPLE_RESOLUTION)
+            {
+                end = SAMPLE_RESOLUTION;
+                start = end - AVERAGE_WINDOW_SIZE;
+            }
+            double averageMagnitude = calculateAverageMagnitude(magnitudes, start, end);
             Colour *colour = malloc(sizeof(Colour));
             colour->r = 0;
             colour->g = 0;
             colour->b = 0;
             DetermineColour(colour, frequencies[max_magnitude_index], max_magnitude);
-            AddLed(colour, LedArray, LED_STRIP_SIZE);
+            AddLed(colour, LedArray, LED_STRIP_SIZE, averageMagnitude);
             free(colour);
 
 // Shift buffer contents by hop size
             memmove(buffer, buffer
                             + HOP_SIZE, (BUFFER_SIZE - HOP_SIZE) * sizeof(int16_t));
             buffer_index -= HOP_SIZE;
-            usleep(DELAY_IN_MS * 1000);
+//            usleep(DELAY_IN_MS * 1000); // we dont want delay here, we want it on a diff thread for update
         }
     }
     // Currently no way to exit, but once we do i don't want to have forgotten later

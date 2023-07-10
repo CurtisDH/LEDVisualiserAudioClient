@@ -3,6 +3,7 @@
 //
 
 #include "colour.h"
+#include "../Configs/constants.h"
 #include <stdio.h>
 
 
@@ -104,11 +105,11 @@ Colour Colours[] = {
 void DetermineColour(Colour *colour, float freq, float mag)
 {
     int numColours = sizeof(Colours) / sizeof(Colour);
-    int jumps = 50;
+
     for (int i = 0; i < numColours; ++i)
     {
-        int freqRange = i * jumps;
-        if (freqRange <= freq || freqRange - jumps >= freq) continue;
+        int freqRange = i * freqJumps;
+        if (freqRange <= freq || freqRange - freqJumps >= freq) continue;
         *colour = Colours[i];
     }
 }

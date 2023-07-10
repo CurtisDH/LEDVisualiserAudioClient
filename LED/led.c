@@ -57,13 +57,14 @@ void ColourBlend()
 
 }
 
-void AddLed(Colour *colour, Led *LedArray, int stripSize)
+void AddLed(Colour *colour, Led *LedArray, int stripSize, double averageMagnitude)
 {
     UpdateStrip(LedArray, stripSize);
-
-    LedArray[0].r = colour->r;
-    LedArray[0].g = colour->g;
-    LedArray[0].b = colour->b;
+    int brightness = (int) (averageMagnitude * MAX_BRIGHTNESS);
+    printf("brightness: %u avg mag%f:", brightness, averageMagnitude);
+    LedArray[0].r = (colour->r * brightness) / MAX_BRIGHTNESS;
+    LedArray[0].g = (colour->g * brightness) / MAX_BRIGHTNESS;
+    LedArray[0].b = (colour->b * brightness) / MAX_BRIGHTNESS;
 
     // push this data out? or do another update strip? -- I think another update is overkill
     sendData(LedArray, stripSize);
