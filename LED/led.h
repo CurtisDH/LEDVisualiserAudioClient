@@ -19,6 +19,8 @@ typedef struct
 
 void AddLed(Colour *colour, Led *LedArray, int stripSize, double averageMagnitude);
 
+void UpdateStrip(Led *LedArray, int stripSize);
+
 void serializeLedData(const Led *LedArray, int ledArraySize, uint8_t *byteArr);
 
 #endif //CAUDIOCLIENT_LED_H

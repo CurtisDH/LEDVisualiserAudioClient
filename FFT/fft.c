@@ -6,10 +6,16 @@
 #include <pulse/error.h>
 #include <malloc.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #include "../LED/led.h"
 #include "../Configs/constants.h"
 #include "../LED/colour.h"
+
+int isRunning = 1;
+
+void *stripUpdateThread(void *arg);
+
 
 void fft(complex double *x, int n)
 {
@@ -63,7 +69,12 @@ void AnalyseAudio(pa_simple *record_handle, int *error, int16_t *buffer, int buf
         LedArray[i].b = 0;
     }
 // basically we need to determine the pattern and the colour based on the frequency that comes up.
-
+    pthread_t pthread;
+    if (pthread_create(&pthread, NULL, stripUpdateThread, (void *) LedArray) != 0)
+    {
+        fprintf(stderr, "Failed to create the thread\n");
+        return;
+    }
 
     while (1)
     {
@@ -158,4 +169,19 @@ void AnalyseAudio(pa_simple *record_handle, int *error, int16_t *buffer, int buf
     }
     // Currently no way to exit, but once we do i don't want to have forgotten later
     free(LedArray);
+    isRunning = 0;
+    pthread_join(pthread, NULL);
+}
+
+
+void *stripUpdateThread(void *arg)
+{
+    Led *LedArray = (Led *) arg;
+
+    while (isRunning)
+    {
+        UpdateStrip(LedArray, LED_STRIP_SIZE);
+    }
+
+    return NULL;
 }

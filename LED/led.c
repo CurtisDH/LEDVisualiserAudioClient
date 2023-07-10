@@ -41,6 +41,7 @@ void serializeLedData(const Led *LedArray, int ledArraySize, uint8_t *byteArr)
 
 void UpdateStrip(Led *LedArray, int stripSize)
 {
+    usleep(DELAY_IN_MS * 1000);
     // todo call in a second thread if required
     for (int i = stripSize; i >= 0; --i)
     {
@@ -50,6 +51,8 @@ void UpdateStrip(Led *LedArray, int stripSize)
     // this way we will get the update effect starting from the opposite side of the strip
     // We do need to allow for a splitting function, so might be worth taking into account when
     // writing the initial update
+    sendData(LedArray, stripSize);
+
 }
 
 void ColourBlend()
@@ -59,14 +62,11 @@ void ColourBlend()
 
 void AddLed(Colour *colour, Led *LedArray, int stripSize, double averageMagnitude)
 {
-    UpdateStrip(LedArray, stripSize);
     int brightness = (int) (averageMagnitude * MAX_BRIGHTNESS);
     printf("brightness: %u avg mag%f:", brightness, averageMagnitude);
     LedArray[0].r = (colour->r * brightness) / MAX_BRIGHTNESS;
     LedArray[0].g = (colour->g * brightness) / MAX_BRIGHTNESS;
     LedArray[0].b = (colour->b * brightness) / MAX_BRIGHTNESS;
 
-    // push this data out? or do another update strip? -- I think another update is overkill
-    sendData(LedArray, stripSize);
 }
 
