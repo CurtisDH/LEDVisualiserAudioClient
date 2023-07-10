@@ -7,9 +7,7 @@
 #include <stdlib.h>
 
 
-
-// TODO might be better to create like an overall config that we just include for these
-// constant variables
+int ledStripState(Led *LedArray);
 
 
 // TODO we need to figure out how we turn off the leds, maybe we literally just make it flow 
@@ -43,6 +41,11 @@ void serializeLedData(const Led *LedArray, int ledArraySize, uint8_t *byteArr)
 
 void UpdateStrip(Led *LedArray, int stripSize)
 {
+    if (ledStripState(LedArray) == 0)
+    {
+        // dont send an update packet if the strip  are all off
+        return;
+    }
     usleep(DELAY_IN_MS * 1000);
     // todo call in a second thread if required
     for (int i = stripSize; i >= 0; --i)
@@ -73,7 +76,7 @@ Colour ColourBlend(Colour initial, Colour previous)
     uint8_t calcG = (uint8_t) (initialG + prevG);
     uint8_t calcB = (uint8_t) (initialB + prevB);
 
-    printf("Blended Color: R=%u, G=%u, B=%u\n", calcR, calcG, calcB);
+//    printf("Blended Color: R=%u, G=%u, B=%u\n", calcR, calcG, calcB);
 
     Colour c = {calcR, calcG, calcB};
     return c;
@@ -88,7 +91,23 @@ void AddLed(Colour colour, Led *LedArray, double averageMagnitude)
     LedArray[0].g = ((colour.g * averageMagnitude) / (255 - MAX_BRIGHTNESS));
     LedArray[0].b = ((colour.b * averageMagnitude) / (255 - MAX_BRIGHTNESS));
 
-    printf("r:%d,g:%d,b:%d", LedArray[0].r, LedArray[0].g, LedArray[0].b);
+//    printf("r:%d,g:%d,b:%d", LedArray[0].r, LedArray[0].g, LedArray[0].b);
 
+}
+
+int ledStripState(Led *LedArray)
+{
+    for (int i = 0; i < LED_STRIP_SIZE; ++i)
+    {
+        if (LedArray[i].r > 0 || LedArray[i].g > 0 || LedArray[i].b > 0)
+        {
+            // Strip has an LED active
+//            printf("LEDS ACTIVE\n");
+            return 1;
+        }
+    }
+    // No leds are currently active
+//    printf("NO LEDS ACTIVE\n");
+    return 0;
 }
 

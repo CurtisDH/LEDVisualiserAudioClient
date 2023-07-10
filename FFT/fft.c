@@ -8,9 +8,12 @@
 #include <unistd.h>
 #include <pthread.h>
 
+
 #include "../LED/led.h"
 #include "../Configs/constants.h"
 #include "../LED/colour.h"
+
+// TODO major refactor this class is gross
 
 int isRunning = 1;
 
@@ -68,6 +71,8 @@ void AnalyseAudio(pa_simple *record_handle, int *error, int16_t *buffer, int buf
         LedArray[i].g = 0;
         LedArray[i].b = 0;
     }
+
+
 // basically we need to determine the pattern and the colour based on the frequency that comes up.
     pthread_t pthread;
     if (pthread_create(&pthread, NULL, stripUpdateThread, (void *) LedArray) != 0)
@@ -80,6 +85,7 @@ void AnalyseAudio(pa_simple *record_handle, int *error, int16_t *buffer, int buf
     {
 // TODO, allow for the user to interrupt this so they can change device without restart
 // Read audio samples into the circular buffer
+
         if (
                 pa_simple_read(record_handle, buffer
                                               + buffer_index, (BUFFER_SIZE - buffer_index) * sizeof(int16_t),
@@ -134,8 +140,11 @@ void AnalyseAudio(pa_simple *record_handle, int *error, int16_t *buffer, int buf
                     max_magnitude_index = i;
                 }
             }
-
-            printf("Maximum magnitude: %f at frequency: %f Hz\n", max_magnitude, frequencies[max_magnitude_index]);
+            // just avoiding spamming the terminal 
+            if (max_magnitude > 0)
+            {
+                printf("Maximum magnitude: %f at frequency: %f Hz\n", max_magnitude, frequencies[max_magnitude_index]);
+            }
 
             // Calculate the average magnitude
             int start = max_magnitude_index - AVERAGE_WINDOW_SIZE / 2;
@@ -152,7 +161,7 @@ void AnalyseAudio(pa_simple *record_handle, int *error, int16_t *buffer, int buf
                 start = end - AVERAGE_WINDOW_SIZE;
             }
             double averageMagnitude = calculateAverageMagnitude(magnitudes, start, end);
-            printf("avg mag %f", averageMagnitude);
+            //printf("avg mag %f", averageMagnitude);
             // couldn't see a difference with this
 //            if (max_magnitude < averageMagnitude)
 //            {
