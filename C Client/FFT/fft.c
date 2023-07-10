@@ -83,6 +83,8 @@ void AnalyseAudio(pa_simple *record_handle, int *error, int16_t *buffer, int buf
         return;
     }
     Colour prevColour = {0, 0, 0};
+    
+
     while (1)
     {
         // TODO, allow for the user to interrupt this so they can change device without restart

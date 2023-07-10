@@ -30,7 +30,20 @@
 // tempo finder -- adjust the update based on the detected song tempo 
 // beat locator -- that way we can have a very visually consistent beat for the song even if ..
 //       the magnitude is flushed covered by other aspects of the song
-
+// Beat detection implementation:
+        // spectral energy calculation
+            // https://stackoverflow.com/questions/28180857/how-to-calculate-the-energy-spectrum-of-a-signal
+        // Onset detection
+            //https://onsetsds.sourceforge.net/
+        // Beat tracking - estimating the bpm
+            //http://labrosa.ee.columbia.edu/projects/beattrack/
+        // Envelope Following - overall energy level of audio
+            // https://docs.cycling74.com/max7/tutorials/09_dynamicschapter01
+        //Beat localisation
+            // couldnt find a whole lot but this might be relevant
+            // https://www.aes.org/e-lib/browse.cfm?elib=18335
+        // all of the above should be able to provide visual consistency instead of 
+        // relying on just the magnitude and frequency as the determining factors
 // some notes seem to stretch really far, not necessarily terrible but would like sharper visual definition
 //examples of this is like piano notes, or guitar picking, so maybe we just need to
 // display groups of frequency at a time if they are recurring 
