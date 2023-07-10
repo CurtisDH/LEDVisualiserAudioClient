@@ -15,5 +15,8 @@
 #define IP_ADDRESS "192.168.1.11"
 #define PORT 5555
 #define DELAY_IN_MS 20
+#define DETECTION_DELAY_IN_MS 100 // this is when the audio has been paused, 
+// how long we wait before checking if the stream has continued again
+// 100ms feels fine for responsiveness and also doesn't seem to have a high load
 
 #endif //CAUDIOCLIENT_CONSTANTS_H

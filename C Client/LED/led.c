@@ -43,6 +43,7 @@ void UpdateStrip(Led *LedArray, int stripSize)
 {
     if (ledStripState(LedArray) == 0)
     {
+        usleep(DETECTION_DELAY_IN_MS * 1000);
         // dont send an update packet if the strip  are all off
         return;
     }
